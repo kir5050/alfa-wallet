@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Альфа-Кошелёк — Customer Journey Map</title>
+<meta name="description" content="Интерактивный клиентский путь продукта Альфа-Кошелёк для партнёров Альфа-Банка">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23EF3124'/><text x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='20' font-weight='800' font-family='Arial'>A</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:#FAFAFA;color:#1A1A1A;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+::-webkit-scrollbar{height:6px}
+::-webkit-scrollbar-track{background:#F3F4F6;border-radius:3px}
+::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+const R="#EF3124",D="#1A1A1A",G="#6B7280";
+
+const scenarios=[
+{id:"new",label:"Новый клиент",desc:"Выпуск карты + пополнение + оплата",color:"#EF3124",icon:"✦",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Клиент видит баннер «Скидка до 35% по Альфа-Карте» на чек-ауте приложения партнёра",metricPartner:"Рост конверсии чек-аута на 12-15% за счёт скидочного оффера",metricBank:"Охват: доступ к аудитории партнёра — миллионы MAU без затрат на привлечение"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Экран с преимуществами: скидка, бесплатное обслуживание, кэшбэк до 30%. Согласия партнёра и банка",metricPartner:"Скидка от банка за счёт экономии на эквайринге — не из маржи партнёра",metricBank:"Стоимость привлечения ≈ 0 ₽ — клиент приходит сам через канал партнёра"},
+{title:"Ввод телефона",zone:"Банк (WebView)",screen:"phone",desc:"Клиент вводит номер телефона. Банк отправляет СМС с ОТР-кодом для идентификации",metricPartner:"Бесшовный UX: клиент не покидает приложение партнёра",metricBank:"Идентификация клиента за 20 секунд — без визита в отделение"},
+{title:"Подтверждение OTP",zone:"Банк (WebView)",screen:"otp",desc:"Клиент вводит 4-значный код из СМС. При успешной валидации клиент идентифицирован",metricPartner:"Минимальный отток: 94% клиентов успешно проходят верификацию",metricBank:"Формирование клиентской базы N2B с привязкой к партнёру"},
+{title:"Заполнение анкеты",zone:"Банк (WebView)",screen:"form",desc:"ФИО, дата рождения, гражданство. Предзаполнение из данных партнёра. 2 шага — минимум полей для MVP",metricPartner:"Предзаполнение из данных партнёра — клиент тратит <60 сек на заявку",metricBank:"Новый клиент банка (N2B): выпуск карты без отделения и курьера"},
+{title:"Цифровая карта выпущена",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск предоплаченной карты. Экран успеха с предложением пополнить и заказать пластик",metricPartner:"Клиент готов к покупке через 2 минуты после нажатия на баннер",metricBank:"Моментальный выпуск ЦТ — конверсия в пластик до 60% от входа в воронку"},
+{title:"Пополнение карты",zone:"Банк (WebView)",screen:"topup",desc:"Для нового клиента: C2B-схема — пополнение через платёжный шлюз с карты другого банка",metricPartner:"Среднее пополнение: 2 500 ₽ — сумма, достаточная для покупки",metricBank:"Привлечение остатков из других банков. Рост балансов на счетах"},
+{title:"Оплата на чек-ауте",zone:"Партнёр",screen:"pay",desc:"Реквизиты ПК автоматически переданы партнёру. Карта привязана к эквайрингу. Клиент видит скидку и платит",metricPartner:"Рост среднего чека +18%, повышение LTV клиента через совместную лояльность",metricBank:"Комиссионный доход от эквайринга. Активация карты = начало транзакционной активности"},
+]},
+{id:"existing",label:"Действующий клиент",desc:"Привязка карты + пополнение + оплата",color:"#F97316",icon:"◆",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Баннер «Добавить Альфа-Карту к оплате» на чек-ауте. Клиент уже имеет Альфа-Карту, но не привязал её",metricPartner:"Аудитория 20 млн клиентов Альфа-Банка — готовые покупатели с картами",metricBank:"Рост транзакционной активности по существующим картам"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Согласия на привязку карты и передачу банковской тайны. Памятка ЭДС, СОПД",metricPartner:"Экономия на эквайринге до 30% при оплате Альфа-Картой",metricBank:"Увеличение доли Альфа-Карт в платёжном миксе партнёра"},
+{title:"Идентификация",zone:"Банк (WebView)",screen:"phone",desc:"Ввод номера телефона + ОТР. Банк идентифицирует клиента",metricPartner:"Быстрая привязка — клиент не уходит из приложения",metricBank:"Создание связки «клиент банка — клиент партнёра» для аналитики и кросс-продаж"},
+{title:"Выбор карты",zone:"Банк (WebView)",screen:"select",desc:"WebView отображает все активные карты в маскированном виде. Клиент выбирает карту для оплаты",metricPartner:"Автоматическая привязка — нет ручного ввода реквизитов (рост конверсии)",metricBank:"Данные о предпочтениях клиента: какую карту выбирает для покупок у партнёра"},
+{title:"Пополнение (me2me)",zone:"Банк (WebView)",screen:"topup_me2me",desc:"Если баланс недостаточен — запрос на пополнение через me2me (перевод между своими счетами)",metricPartner:"Клиент не уходит при нехватке средств — пополняет карту прямо в процессе",metricBank:"Консолидация остатков клиента на карте Альфа-Банка"},
+{title:"Оплата со скидкой",zone:"Партнёр",screen:"pay",desc:"Реквизиты переданы → карта привязана к эквайрингу → применяется скидка → клиент платит",metricPartner:"Рост частоты покупок на 25% благодаря совместной программе лояльности",metricBank:"Рост TPV (объём транзакций) по эквайрингу через партнёрский канал"},
+]},
+{id:"no_card",label:"Клиент без активной карты",desc:"Выпуск ДК + привязка + оплата",color:"#8B5CF6",icon:"●",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Информер о повышенной скидке по Альфа-Карте",metricPartner:"Реактивация спящих клиентов банка через канал партнёра",metricBank:"Возврат неактивных клиентов: выпуск новой ДК без затрат на ремаркетинг"},
+{title:"Согласия + идентификация",zone:"Банк (WebView)",screen:"consents",desc:"Согласия банка + ввод телефона + OTP. Банк определяет клиента как действующего без активной ДК",metricPartner:"Партнёр получает лояльного клиента с банковской историей",metricBank:"Идентификация по существующему CUS — не нужна полная анкета"},
+{title:"Предложение выпуска",zone:"Банк (WebView)",screen:"upsell",desc:"Экран: «Выпустите бесплатную Альфа-Карту и получите повышенную скидку»",metricPartner:"Дополнительная мотивация к покупке — скидка привязана к новой карте",metricBank:"Конверсия в выпуск ДК: 55% — эффективнее прямых каналов в 3 раза"},
+{title:"Заявка на ДК",zone:"Банк (WebView)",screen:"form",desc:"Заполнение анкеты для выпуска дебетовой карты. Предзаполнение ФИО из данных банка",metricPartner:"Предзаполнение из данных банка — максимально простая заявка для клиента",metricBank:"Выпуск полноценной ДК: долгосрочный продукт с потенциалом кросс-продаж"},
+{title:"Выбор доставки пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Выбор отделения или курьерской доставки. После получения пластика — автоматическая привязка к партнёру",metricPartner:"После активации пластика — автоматическая привязка к оплате у партнёра",metricBank:"Заказ пластика: +64% клиентов → долгосрочная активация и NPS"},
+{title:"Привязка и оплата",zone:"Партнёр",screen:"pay",desc:"После активации ДК — автоматическая передача реквизитов и привязка к оплате через API",metricPartner:"LTV клиента +40% за счёт регулярных покупок с кэшбэком",metricBank:"Полноценный активный клиент с ДК, транзакционной историей и балансом"},
+]}
+];
+
+const benefitsPartner=[
+{icon:"💰",title:"Экономия на эквайринге",desc:"Сниженная ставка за транзакции по Альфа-Карте — экономия до 30% vs обычный interchange"},
+{icon:"👥",title:"20 млн готовых клиентов",desc:"Альфа-Банк приводит платёжеспособную аудиторию в канал партнёра"},
+{icon:"📈",title:"Рост среднего чека +18%",desc:"Клиенты с Альфа-Кошельком тратят больше за счёт кэшбэка и скидок"},
+{icon:"🔄",title:"Частота покупок +25%",desc:"Совместная лояльность мотивирует возвращаться к партнёру"},
+{icon:"🎁",title:"Совместные офферы",desc:"Скидки финансируются банком из экономии на эквайринге, не из маржи партнёра"},
+{icon:"🛡️",title:"BNPL / рассрочка",desc:"Дополнительный инструмент увеличения конверсии и чека"},
+];
+const benefitsBank=[
+{icon:"🆕",title:"N2B: новые клиенты",desc:"Привлечение клиентов через партнёров с CAC ≈ 0 ₽ (vs 3 000–5 000 ₽ в прямых каналах)"},
+{icon:"💳",title:"Выпуск карт",desc:"Моментальный выпуск ПК/ДК в канале партнёра — конверсия до 50% от входа в воронку"},
+{icon:"💹",title:"Рост TPV",desc:"Объём транзакций по эквайрингу через партнёрскую сеть"},
+{icon:"🏦",title:"Привлечение остатков",desc:"Пополнение карт из других банков — рост балансов на счетах Альфа-Банка"},
+{icon:"📊",title:"Данные и аналитика",desc:"Связка «клиент банка — покупатель партнёра» для таргетированных продуктов"},
+{icon:"🔗",title:"Кросс-продажи",desc:"Кредиты, страхование, инвестиции — на базе транзакционной истории у партнёра"},
+];
+
+const S={
+offer:{bg:"linear-gradient(135deg,#FEF3C7,#FDE68A)",title:"Чек-аут партнёра",content:()=>(
+<div style={{textAlign:"center",padding:16}}>
+<div style={{background:"#fff",borderRadius:16,padding:16,boxShadow:"0 2px 12px rgba(0,0,0,.08)",marginBottom:12}}>
+<div style={{fontSize:11,color:G}}>Ваш заказ</div>
+<div style={{fontSize:22,fontWeight:700,color:D}}>2 729 ₽</div>
+</div>
+<div style={{background:R,borderRadius:16,padding:16,color:"#fff",position:"relative",overflow:"hidden"}}>
+<div style={{position:"absolute",top:-20,right:-20,fontSize:80,opacity:.12}}>%</div>
+<div style={{fontSize:13,fontWeight:600,opacity:.9}}>Вам доступно</div>
+<div style={{fontSize:28,fontWeight:800}}>−35%</div>
+<div style={{fontSize:11,opacity:.8}}>По Альфа-Карте</div>
+<div style={{background:"#fff",color:R,borderRadius:10,padding:"8px 0",marginTop:12,fontWeight:700,fontSize:13}}>Добавить Альфа-Карту</div>
+</div></div>)},
+consents:{bg:"linear-gradient(135deg,#FEE2E2,#FECACA)",title:"Оффер + согласия",content:()=>(
+<div style={{padding:16,textAlign:"center"}}>
+<div style={{width:48,height:48,background:R,borderRadius:12,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+<span style={{color:"#fff",fontSize:24,fontWeight:800}}>A</span></div>
+<div style={{fontSize:15,fontWeight:700,color:D}}>Платите Альфа-Картой</div>
+<div style={{fontSize:11,color:G,margin:"6px 0 16px"}}>Оформите карту и сделайте заказ со скидкой</div>
+{["Скидка до 35%","Бесплатно навсегда","Кэшбэк до 30%"].map((t,i)=>(
+<div key={i} style={{background:"#fff",borderRadius:10,padding:"8px 12px",marginBottom:6,display:"flex",alignItems:"center",gap:8,fontSize:12}}>
+<span style={{color:"#16A34A",fontWeight:700}}>✓</span>{t}</div>))}
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",marginTop:16,fontWeight:700,fontSize:13}}>Продолжить</div>
+<div style={{fontSize:8,color:G,marginTop:8,lineHeight:1.3}}>Нажимая «Продолжить», я подтверждаю согласие с Памяткой ЭДС, СОПД и условиями</div>
+</div>)},
+phone:{bg:"linear-gradient(135deg,#F3F4F6,#E5E7EB)",title:"Ввод телефона",content:()=>(
+<div style={{padding:"20px 16px",textAlign:"center"}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:4}}>Введите номер телефона</div>
+<div style={{fontSize:11,color:G,marginBottom:20}}>Мы отправим код подтверждения</div>
+<div style={{background:"#fff",borderRadius:12,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
+<div style={{fontSize:10,color:G}}>Номер телефона</div>
+<div style={{fontSize:18,fontWeight:600,color:D,letterSpacing:1}}>+7 (999) 123-45-67</div></div>
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",fontWeight:700,fontSize:13}}>Продолжить</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginTop:16}}>
+{[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map((n,i)=>(
+<div key={i} style={{background:n===""?"transparent":"#F3F4F6",borderRadius:8,padding:"10px 0",fontSize:16,fontWeight:500,color:D}}>{n}</div>))}
+</div></div>)},
+otp:{bg:"linear-gradient(135deg,#F3F4F6,#E5E7EB)",title:"Код из СМС",content:()=>(
+<div style={{padding:"20px 16px",textAlign:"center"}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:4}}>Введите код из СМС</div>
+<div style={{fontSize:11,color:G,marginBottom:20}}>Код отправлен на +7 999 123-45-67</div>
+<div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:16}}>
+{[4,8,2,""].map((d,i)=>(
+<div key={i} style={{width:44,height:52,background:"#fff",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:700,color:D,border:i===3?"2px solid "+R:"2px solid #E5E7EB"}}>
+{d}{i===3&&<span style={{opacity:.3}}>|</span>}</div>))}
+</div>
+<div style={{fontSize:11,color:R}}>Повторно через 0:25</div></div>)},
+form:{bg:"linear-gradient(135deg,#EFF6FF,#DBEAFE)",title:"Заполнение анкеты",content:()=>(
+<div style={{padding:16}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:4}}>Заполните заявку</div>
+<div style={{fontSize:11,color:G,marginBottom:16}}>Шаг 1 из 2</div>
+{[{l:"Фамилия",v:"Иванов"},{l:"Имя",v:"Алексей"},{l:"Отчество",v:"Сергеевич"},{l:"Дата рождения",v:"15.03.1990"}].map((f,i)=>(
+<div key={i} style={{background:"#fff",borderRadius:10,padding:"8px 12px",marginBottom:8}}>
+<div style={{fontSize:9,color:G}}>{f.l}</div>
+<div style={{fontSize:13,fontWeight:500,color:D}}>{f.v}</div></div>))}
+<div style={{display:"flex",gap:8,marginTop:4}}>
+<div style={{flex:1,background:"#fff",borderRadius:10,padding:"8px 12px",textAlign:"center"}}>
+<div style={{fontSize:9,color:G}}>Гражданин РФ?</div>
+<div style={{fontSize:12,fontWeight:600,color:"#16A34A"}}>Да ✓</div></div></div>
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",marginTop:14,fontWeight:700,fontSize:13,textAlign:"center"}}>Продолжить</div>
+</div>)},
+issued:{bg:"linear-gradient(135deg,#ECFDF5,#D1FAE5)",title:"Карта выпущена!",content:()=>(
+<div style={{padding:"20px 16px",textAlign:"center"}}>
+<div style={{width:56,height:56,background:"#16A34A",borderRadius:"50%",margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>✓</div>
+<div style={{fontSize:16,fontWeight:700,color:D}}>Цифровая карта выпущена!</div>
+<div style={{fontSize:11,color:G,margin:"8px 0 20px",lineHeight:1.4}}>Пополните её и получайте скидку. Закажите пластиковую карту для максимальной выгоды</div>
+<div style={{background:"#fff",borderRadius:14,padding:16,boxShadow:"0 2px 12px rgba(0,0,0,.06)",marginBottom:16}}>
+<div style={{background:"linear-gradient(135deg,"+R+",#DC2626)",borderRadius:10,padding:12,color:"#fff",textAlign:"left"}}>
+<div style={{fontSize:9,opacity:.7}}>Альфа карта</div>
+<div style={{fontSize:14,fontWeight:700,letterSpacing:2,marginTop:4}}>•••• 4567</div>
+<div style={{fontSize:10,marginTop:4,opacity:.8}}>Баланс: 0 ₽</div></div></div>
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",fontWeight:700,fontSize:13}}>Пополнить</div></div>)},
+topup:{bg:"linear-gradient(135deg,#F3F4F6,#E5E7EB)",title:"Пополнение (C2B)",content:()=>(
+<div style={{padding:16,textAlign:"center"}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:16}}>Подтвердите пополнение</div>
+{[{l:"Сумма",v:"2 500 ₽"},{l:"Комиссия",v:"0 ₽"},{l:"Откуда",v:"Т-Банк ****8901"},{l:"Куда",v:"Альфа-Банк ****4567"}].map((r,i)=>(
+<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #E5E7EB",fontSize:12}}>
+<span style={{color:G}}>{r.l}</span><span style={{fontWeight:600,color:D}}>{r.v}</span></div>))}
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",marginTop:20,fontWeight:700,fontSize:13}}>Продолжить</div></div>)},
+topup_me2me:{bg:"linear-gradient(135deg,#F3F4F6,#E5E7EB)",title:"Пополнение (me2me)",content:()=>(
+<div style={{padding:16,textAlign:"center"}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:4}}>Запрос на пополнение</div>
+<div style={{fontSize:11,color:G,marginBottom:16}}>Перевод между своими счетами</div>
+{[{l:"Сумма",v:"2 729 ₽"},{l:"Банк списания",v:"Альфа-Банк"},{l:"Куда",v:"Альфа-Карта ****4567"}].map((r,i)=>(
+<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #E5E7EB",fontSize:12}}>
+<span style={{color:G}}>{r.l}</span><span style={{fontWeight:600,color:D}}>{r.v}</span></div>))}
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",marginTop:20,fontWeight:700,fontSize:13}}>Подтвердить</div></div>)},
+select:{bg:"linear-gradient(135deg,#F3F4F6,#E5E7EB)",title:"Выбор карты",content:()=>(
+<div style={{padding:16}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:16}}>Выберите карту для оплаты</div>
+{[{n:"Альфа карта",num:"****4567",bal:"15 200 ₽",sel:true},{n:"Альфа карта",num:"****3456",bal:"1 100 ₽",sel:false}].map((c,i)=>(
+<div key={i} style={{background:c.sel?"#FEF2F2":"#fff",border:c.sel?"2px solid "+R:"2px solid #E5E7EB",borderRadius:12,padding:12,marginBottom:8,display:"flex",alignItems:"center",gap:12}}>
+<div style={{width:40,height:28,background:"linear-gradient(135deg,"+R+",#DC2626)",borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center"}}>
+<span style={{color:"#fff",fontSize:8,fontWeight:700}}>ALFA</span></div>
+<div style={{flex:1}}><div style={{fontSize:12,fontWeight:600,color:D}}>{c.n}</div>
+<div style={{fontSize:10,color:G}}>{c.num} · {c.bal}</div></div>
+{c.sel&&<div style={{width:20,height:20,background:R,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:12}}>✓</div>}
+</div>))}
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",marginTop:12,fontWeight:700,fontSize:13,textAlign:"center"}}>К оплате</div></div>)},
+pay:{bg:"linear-gradient(135deg,#ECFDF5,#D1FAE5)",title:"Оплата со скидкой",content:()=>(
+<div style={{padding:"20px 16px",textAlign:"center"}}>
+<div style={{width:56,height:56,background:"#16A34A",borderRadius:"50%",margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>✓</div>
+<div style={{fontSize:16,fontWeight:700,color:D}}>Готово к оплате!</div>
+<div style={{fontSize:11,color:G,margin:"8px 0 20px"}}>Альфа-Карта привязана к чек-ауту</div>
+<div style={{background:"#fff",borderRadius:14,padding:16,boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}>
+<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+<span style={{fontSize:12,color:G}}>Заказ</span><span style={{fontSize:12,color:G,textDecoration:"line-through"}}>2 729 ₽</span></div>
+<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+<span style={{fontSize:12,color:"#16A34A",fontWeight:600}}>Скидка −35%</span><span style={{fontSize:12,color:"#16A34A",fontWeight:600}}>−955 ₽</span></div>
+<div style={{borderTop:"2px solid #E5E7EB",paddingTop:8,display:"flex",justifyContent:"space-between"}}>
+<span style={{fontSize:14,fontWeight:700,color:D}}>Итого</span><span style={{fontSize:18,fontWeight:800,color:R}}>1 774 ₽</span></div></div>
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",marginTop:16,fontWeight:700,fontSize:13}}>Оплатить</div></div>)},
+upsell:{bg:"linear-gradient(135deg,#EFF6FF,#DBEAFE)",title:"Предложение выпуска",content:()=>(
+<div style={{padding:"20px 16px",textAlign:"center"}}>
+<div style={{width:48,height:48,background:R,borderRadius:12,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+<span style={{color:"#fff",fontSize:24,fontWeight:800}}>A</span></div>
+<div style={{fontSize:15,fontWeight:700,color:D,lineHeight:1.3}}>Выпустите бесплатную Альфа-Карту</div>
+<div style={{fontSize:12,color:G,margin:"8px 0 16px",lineHeight:1.4}}>и получите повышенную скидку. Карта будет привязана автоматически.</div>
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",fontWeight:700,fontSize:13}}>Оформить карту</div></div>)},
+delivery:{bg:"linear-gradient(135deg,#EFF6FF,#DBEAFE)",title:"Заказ пластика",content:()=>(
+<div style={{padding:16,textAlign:"center"}}>
+<div style={{fontSize:15,fontWeight:700,color:D,marginBottom:4}}>Пластиковая карта заказана</div>
+<div style={{fontSize:11,color:G,marginBottom:16}}>Пришлём СМС, когда карта будет готова</div>
+<div style={{background:"#fff",borderRadius:12,padding:12,textAlign:"left",marginBottom:16}}>
+<div style={{fontSize:10,color:G}}>Адрес доставки</div>
+<div style={{fontSize:12,fontWeight:500,color:D}}>г. Москва, Проспект Победы, д. 16</div>
+<div style={{fontSize:10,color:G,marginTop:8}}>Понадобится паспорт</div></div>
+<div style={{background:R,color:"#fff",borderRadius:10,padding:"10px 0",fontWeight:700,fontSize:13}}>Вернуться к оплате</div></div>)}
+};
+
+function Phone({screenKey,color}){
+const s=S[screenKey]||S.offer;
+return(
+<div style={{width:240,minHeight:440,borderRadius:32,background:"#000",padding:8,boxShadow:"0 20px 60px rgba(0,0,0,.25)",flexShrink:0}}>
+<div style={{borderRadius:24,overflow:"hidden",background:s.bg,minHeight:424}}>
+<div style={{background:"rgba(0,0,0,.04)",padding:"10px 16px 6px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<span style={{fontSize:10,fontWeight:600}}>9:41</span>
+<div style={{width:60,height:4,background:"#000",borderRadius:2,opacity:.2}}/>
+<span style={{fontSize:10}}>📶 🔋</span></div>
+<div style={{padding:"4px 8px",textAlign:"center"}}>
+<span style={{fontSize:9,fontWeight:600,color:"#fff",background:color||R,borderRadius:6,padding:"2px 8px"}}>{s.title}</span></div>
+{s.content()}</div></div>);
+}
+
+function App(){
+const[as,setAs]=useState(0);
+const[st,setSt]=useState(0);
+const[sm,setSm]=useState(true);
+const sc=scenarios[as],step=sc.steps[st];
+useEffect(()=>{setSt(0)},[as]);
+
+return(
+<div style={{minHeight:"100vh",background:"#FAFAFA",color:D}}>
+<div style={{background:"linear-gradient(135deg,"+D+",#2D2D2D)",padding:"24px 32px 20px",color:"#fff"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
+<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:8}}>
+<div style={{width:40,height:40,background:R,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:18}}>A</div>
+<div><div style={{fontSize:20,fontWeight:800,letterSpacing:-.3}}>Альфа-Кошелёк</div>
+<div style={{fontSize:12,opacity:.6}}>Customer Journey Map — Универсальный прототип</div></div></div>
+<button onClick={()=>setSm(!sm)} style={{background:"rgba(255,255,255,.1)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:8,fontSize:11,cursor:"pointer",fontWeight:600}}>
+{sm?"Скрыть":"Показать"} метрики</button></div>
+<div style={{display:"flex",gap:8,marginTop:16,flexWrap:"wrap"}}>
+{scenarios.map((s,i)=>(
+<button key={s.id} onClick={()=>setAs(i)} style={{background:i===as?s.color:"rgba(255,255,255,.08)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s",opacity:i===as?1:.7}}>
+<span style={{marginRight:6}}>{s.icon}</span>{s.label}</button>))}</div></div>
+
+<div style={{padding:"20px 24px",maxWidth:1200,margin:"0 auto"}}>
+<div style={{background:"#fff",borderRadius:14,padding:"14px 20px",marginBottom:20,borderLeft:"4px solid "+sc.color,boxShadow:"0 1px 4px rgba(0,0,0,.05)"}}>
+<div style={{fontSize:14,fontWeight:700,color:sc.color}}>{sc.label}</div>
+<div style={{fontSize:12,color:G}}>{sc.desc}</div></div>
+
+<div style={{display:"flex",gap:4,marginBottom:20,overflowX:"auto",paddingBottom:4}}>
+{sc.steps.map((s,i)=>(
+<button key={i} onClick={()=>setSt(i)} style={{flex:"1 0 auto",minWidth:80,background:i===st?sc.color:i<st?"#E5E7EB":"#F3F4F6",border:"none",color:i===st?"#fff":i<st?"#6B7280":"#9CA3AF",padding:"8px 10px",borderRadius:10,cursor:"pointer",fontSize:10,fontWeight:600,transition:"all .2s",textAlign:"center",lineHeight:1.3}}>
+<div style={{fontSize:14,fontWeight:800,marginBottom:2}}>{i+1}</div>{s.title}</button>))}</div>
+
+<div style={{display:"flex",gap:24,flexWrap:"wrap",alignItems:"flex-start"}}>
+<div style={{display:"flex",justifyContent:"center",flex:"0 0 auto"}}><Phone screenKey={step.screen} color={sc.color}/></div>
+<div style={{flex:"1 1 300px",minWidth:280}}>
+<div style={{background:"#fff",borderRadius:16,padding:20,boxShadow:"0 2px 12px rgba(0,0,0,.06)",marginBottom:16}}>
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+<div style={{width:28,height:28,background:sc.color,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13,fontWeight:800}}>{st+1}</div>
+<div><div style={{fontSize:16,fontWeight:700}}>{step.title}</div>
+<div style={{fontSize:10,color:sc.color,fontWeight:600,background:sc.color+"15",padding:"1px 6px",borderRadius:4,display:"inline-block"}}>{step.zone}</div></div></div>
+<div style={{fontSize:13,color:G,lineHeight:1.5}}>{step.desc}</div>
+{sm&&step.metricPartner&&(
+<div style={{marginTop:14,display:"flex",flexDirection:"column",gap:8}}>
+<div style={{background:"#FFF7ED",borderRadius:10,padding:"10px 12px",display:"flex",alignItems:"flex-start",gap:8}}>
+<span style={{fontSize:16,flexShrink:0}}>🏪</span>
+<div><div style={{fontSize:10,color:"#EA580C",fontWeight:600}}>Ценность для партнёра</div>
+<div style={{fontSize:12,fontWeight:600,color:D,lineHeight:1.3}}>{step.metricPartner}</div></div></div>
+<div style={{background:"#FEF2F2",borderRadius:10,padding:"10px 12px",display:"flex",alignItems:"flex-start",gap:8}}>
+<span style={{fontSize:16,flexShrink:0}}>🏦</span>
+<div><div style={{fontSize:10,color:R,fontWeight:600}}>Ценность для Альфа-Банка</div>
+<div style={{fontSize:12,fontWeight:600,color:D,lineHeight:1.3}}>{step.metricBank}</div></div></div>
+</div>)}</div>
+<div style={{display:"flex",gap:8}}>
+<button disabled={st===0} onClick={()=>setSt(p=>p-1)} style={{flex:1,background:st===0?"#E5E7EB":"#fff",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 0",cursor:st===0?"default":"pointer",fontSize:12,fontWeight:600,color:st===0?"#9CA3AF":D}}>← Назад</button>
+<button disabled={st===sc.steps.length-1} onClick={()=>setSt(p=>p+1)} style={{flex:1,background:st===sc.steps.length-1?"#E5E7EB":sc.color,border:"none",borderRadius:10,padding:"10px 0",cursor:st===sc.steps.length-1?"default":"pointer",fontSize:12,fontWeight:600,color:"#fff"}}>Далее →</button></div></div></div>
+
+{sm&&(<div style={{marginTop:28}}>
+<div style={{fontSize:16,fontWeight:700,color:D,marginBottom:4}}>🏪 Преимущества для партнёра</div>
+<div style={{fontSize:11,color:G,marginBottom:12}}>Что получает бизнес от интеграции Альфа-Кошелька</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:10,marginBottom:24}}>
+{benefitsPartner.map((b,i)=>(
+<div key={i} style={{background:"#fff",borderRadius:12,padding:"14px 16px",boxShadow:"0 1px 4px rgba(0,0,0,.04)",borderTop:"3px solid #F97316"}}>
+<div style={{fontSize:22,marginBottom:6}}>{b.icon}</div>
+<div style={{fontSize:12,fontWeight:700,color:D,marginBottom:3}}>{b.title}</div>
+<div style={{fontSize:10,color:G,lineHeight:1.3}}>{b.desc}</div></div>))}</div>
+<div style={{fontSize:16,fontWeight:700,color:D,marginBottom:4}}>🏦 Ценность для Альфа-Банка</div>
+<div style={{fontSize:11,color:G,marginBottom:12}}>Стратегические эффекты от партнёрского канала</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:10}}>
+{benefitsBank.map((b,i)=>(
+<div key={i} style={{background:"#fff",borderRadius:12,padding:"14px 16px",boxShadow:"0 1px 4px rgba(0,0,0,.04)",borderTop:"3px solid "+R}}>
+<div style={{fontSize:22,marginBottom:6}}>{b.icon}</div>
+<div style={{fontSize:12,fontWeight:700,color:D,marginBottom:3}}>{b.title}</div>
+<div style={{fontSize:10,color:G,lineHeight:1.3}}>{b.desc}</div></div>))}</div></div>)}
+
+<div style={{textAlign:"center",padding:"24px 0 12px",fontSize:10,color:"#9CA3AF"}}>
+АО «Альфа-Банк» · xPlatform · Альфа-Кошелёк · 2026</div></div></div>);}
+
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
