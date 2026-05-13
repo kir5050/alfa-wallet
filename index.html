@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Альфа-Кошелёк — Customer Journey Map</title>
-<meta name="description" content="Интерактивный клиентский путь продукта Альфа-Кошелёк для партнёров Альфа-Банка">
+<title>xPay — Customer Journey Map</title>
+<meta name="description" content="Интерактивный клиентский путь продукта xPay для партнёров Альфа-Банка">
 <meta name="theme-color" content="#050505">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23EF3124'/><text x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='20' font-weight='800' font-family='Arial'>A</text></svg>">
 
@@ -189,8 +189,20 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-r
 @media (max-width: 720px){
   .hero{padding:80px 20px 40px !important}
   .section{padding-left:20px !important;padding-right:20px !important}
-  .step-rail{gap:8px !important;overflow-x:auto;padding-bottom:8px !important}
-  .step-rail-item{min-width:140px !important}
+  .step-rail{
+    display:flex !important;
+    grid-template-columns:none !important;
+    gap:10px !important;
+    overflow-x:auto;
+    padding-bottom:10px !important;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;
+  }
+  .step-rail-item{
+    flex:0 0 140px !important;
+    min-width:140px !important;
+    scroll-snap-align:start;
+  }
   .metrics-grid{grid-template-columns:1fr !important}
   .metrics-grid > .m-r{padding-left:0 !important;padding-top:24px !important;border-left:none !important;border-top:1px solid var(--line-2) !important}
   .bento-grid{grid-template-columns:1fr !important}
@@ -224,9 +236,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-r
     </defs>
     <rect width="1200" height="800" fill="#050505"/>
     <rect width="1200" height="800" fill="url(#g1)"/>
-    <text x="600" y="380" text-anchor="middle" fill="#FAFAFA" font-family="system-ui" font-weight="800" font-size="120" letter-spacing="-4">Альфа-</text>
-    <text x="600" y="500" text-anchor="middle" fill="#EF3124" font-family="system-ui" font-weight="800" font-size="120" letter-spacing="-4">Кошелёк</text>
-    <text x="600" y="600" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="system-ui" font-size="22">Customer Journey Map</text>
+    <text x="600" y="460" text-anchor="middle" fill="#EF3124" font-family="system-ui" font-weight="800" font-size="200" letter-spacing="-6">xPay</text>
+    <text x="600" y="540" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="system-ui" font-size="22">Customer Journey Map</text>
   </svg>
 </template>
 
@@ -259,12 +270,13 @@ const EASE = [0.16, 1, 0.3, 1];
 const scenarios=[
 {id:"new",label:"Новый клиент",desc:"Выпуск карты + пополнение + оплата",steps:[
 {title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Клиент видит баннер «Скидка до 35% по Альфа-Карте» на чек-ауте приложения партнёра",metricPartner:"Рост конверсии чек-аута на 12-15% за счёт скидочного оффера",metricBank:"Охват: доступ к аудитории партнёра — миллионы MAU без затрат на привлечение"},
-{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Экран с преимуществами: скидка, бесплатное обслуживание, кэшбэк до 30%. Согласия партнёра и банка",metricPartner:"Скидка от банка за счёт экономии на эквайринге — не из маржи партнёра",metricBank:"Стоимость привлечения ≈ 0 ₽ — клиент приходит сам через канал партнёра"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Экран с преимуществами: скидка, бесплатное обслуживание, кэшбэк до 30%. Согласия партнёра и банка",metricPartner:"Скидка от банка за счёт экономии на эквайринге — не из маржи партнёра",metricBank:"Новый клиент банка приходит из готовой аудитории партнёра — без рекламных расходов на привлечение"},
 {title:"Ввод телефона",zone:"Банк (WebView)",screen:"phone",desc:"Клиент вводит номер телефона. Банк отправляет СМС с ОТР-кодом для идентификации",metricPartner:"Бесшовный UX: клиент не покидает приложение партнёра",metricBank:"Идентификация клиента за 20 секунд — без визита в отделение"},
 {title:"Подтверждение OTP",zone:"Банк (WebView)",screen:"otp",desc:"Клиент вводит 4-значный код из СМС. При успешной валидации клиент идентифицирован",metricPartner:"Минимальный отток: 94% клиентов успешно проходят верификацию",metricBank:"Формирование клиентской базы N2B с привязкой к партнёру"},
 {title:"Заполнение анкеты",zone:"Банк (WebView)",screen:"form",desc:"ФИО, дата рождения, гражданство. Предзаполнение из данных партнёра. 2 шага — минимум полей для MVP",metricPartner:"Предзаполнение из данных партнёра — клиент тратит <60 сек на заявку",metricBank:"Новый клиент банка (N2B): выпуск карты без отделения и курьера"},
 {title:"Цифровая карта выпущена",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск предоплаченной карты. Экран успеха с предложением пополнить и заказать пластик",metricPartner:"Клиент готов к покупке через 2 минуты после нажатия на баннер",metricBank:"Моментальный выпуск ЦТ — конверсия в пластик до 60% от входа в воронку"},
 {title:"Пополнение карты",zone:"Банк (WebView)",screen:"topup",desc:"Для нового клиента: C2B-схема — пополнение через платёжный шлюз с карты другого банка",metricPartner:"Среднее пополнение: 2 500 ₽ — сумма, достаточная для покупки",metricBank:"Привлечение остатков из других банков. Рост балансов на счетах"},
+{title:"Заказ пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Банк предлагает заказать пластиковую карту с курьерской доставкой или самовывозом. Цифровая карта остаётся активной — оплата возможна прямо сейчас",metricPartner:"Долгосрочная привязка клиента: пластик с предустановленной связкой с эквайрингом партнёра",metricBank:"Заказ пластика: до 64% клиентов → рост среднего срока жизни клиента и NPS"},
 {title:"Оплата на чек-ауте",zone:"Партнёр",screen:"pay",desc:"Реквизиты ПК автоматически переданы партнёру. Карта привязана к эквайрингу. Клиент видит скидку и платит",metricPartner:"Рост среднего чека +18%, повышение LTV клиента через совместную лояльность",metricBank:"Комиссионный доход от эквайринга. Активация карты = начало транзакционной активности"},
 ]},
 {id:"existing",label:"Действующий клиент",desc:"Привязка карты + пополнение + оплата",steps:[
@@ -280,6 +292,8 @@ const scenarios=[
 {title:"Согласия + идентификация",zone:"Банк (WebView)",screen:"consents",desc:"Согласия банка + ввод телефона + OTP. Банк определяет клиента как действующего без активной ДК",metricPartner:"Партнёр получает лояльного клиента с банковской историей",metricBank:"Идентификация по существующему CUS — не нужна полная анкета"},
 {title:"Предложение выпуска",zone:"Банк (WebView)",screen:"upsell",desc:"Экран: «Выпустите бесплатную Альфа-Карту и получите повышенную скидку»",metricPartner:"Дополнительная мотивация к покупке — скидка привязана к новой карте",metricBank:"Конверсия в выпуск ДК: 55% — эффективнее прямых каналов в 3 раза"},
 {title:"Заявка на ДК",zone:"Банк (WebView)",screen:"form",desc:"Заполнение анкеты для выпуска дебетовой карты. Предзаполнение ФИО из данных банка",metricPartner:"Предзаполнение из данных банка — максимально простая заявка для клиента",metricBank:"Выпуск полноценной ДК: долгосрочный продукт с потенциалом кросс-продаж"},
+{title:"Цифровая ДК выпущена",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск цифровой дебетовой карты. Пока пластик доставляется — клиент платит цифровой версией с тем же набором преимуществ",metricPartner:"Клиент готов к покупке через 90 секунд — без ожидания пластика по почте",metricBank:"Активация ДК в день выпуска до 85% — против ~60% в стандартных каналах"},
+{title:"Пополнение карты",zone:"Банк (WebView)",screen:"topup",desc:"C2B-схема: пополнение цифровой ДК с карты другого банка через платёжный шлюз. Клиент получает баланс для немедленной оплаты у партнёра",metricPartner:"Среднее пополнение 2 500 ₽ — достаточно для оплаты с применением скидки",metricBank:"Привлечение остатков из других банков на новую ДК → рост балансов"},
 {title:"Выбор доставки пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Выбор отделения или курьерской доставки. После получения пластика — автоматическая привязка к партнёру",metricPartner:"После активации пластика — автоматическая привязка к оплате у партнёра",metricBank:"Заказ пластика: +64% клиентов → долгосрочная активация и NPS"},
 {title:"Привязка и оплата",zone:"Партнёр",screen:"pay",desc:"После активации ДК — автоматическая передача реквизитов и привязка к оплате через API",metricPartner:"LTV клиента +40% за счёт регулярных покупок с кэшбэком",metricBank:"Полноценный активный клиент с ДК, транзакционной историей и балансом"},
 ]}
@@ -288,13 +302,13 @@ const scenarios=[
 const benefitsPartner=[
 {icon:"gift",title:"Экономия на эквайринге",desc:"Сниженная ставка за транзакции по Альфа-Карте — экономия до 30% vs обычный interchange",accent:"30%"},
 {icon:"users",title:"20 млн готовых клиентов",desc:"Альфа-Банк приводит платёжеспособную аудиторию в канал партнёра",accent:"20M"},
-{icon:"trend",title:"Рост среднего чека +18%",desc:"Клиенты с Альфа-Кошельком тратят больше за счёт кэшбэка и скидок",accent:"+18%"},
+{icon:"trend",title:"Рост среднего чека +18%",desc:"Клиенты с xPay тратят больше за счёт кэшбэка и скидок",accent:"+18%"},
 {icon:"refresh",title:"Частота покупок +25%",desc:"Совместная лояльность мотивирует возвращаться к партнёру",accent:"+25%"},
 {icon:"sparkle",title:"Совместные офферы",desc:"Скидки финансируются банком из экономии на эквайринге, не из маржи партнёра"},
 {icon:"shield",title:"BNPL / рассрочка",desc:"Дополнительный инструмент увеличения конверсии и чека"},
 ];
 const benefitsBank=[
-{icon:"users",title:"N2B: новые клиенты",desc:"Привлечение клиентов через партнёров с CAC ≈ 0 ₽ (vs 3 000–5 000 ₽ в прямых каналах)",accent:"≈0₽"},
+{icon:"users",title:"N2B: новые клиенты",desc:"N2B: привлечение клиентов через готовую аудиторию партнёра — масштабный канал в дополнение к прямым медиа",accent:"N2B"},
 {icon:"card",title:"Выпуск карт",desc:"Моментальный выпуск ПК/ДК в канале партнёра — конверсия до 50% от входа в воронку",accent:"до 50%"},
 {icon:"chart",title:"Рост TPV",desc:"Объём транзакций по эквайрингу через партнёрскую сеть"},
 {icon:"savings",title:"Привлечение остатков",desc:"Пополнение карт из других банков — рост балансов на счетах Альфа-Банка"},
@@ -736,7 +750,7 @@ function Navbar({showMetrics, setShowMetrics, scrolled}){
    8. HERO
    ============================================================ */
 function Hero({activeScenario, setActiveScenario}){
-  const titleParts = ["Альфа-", "Кошелёк"];
+  const titleParts = ["x", "Pay"];
 
   return (
     <section className="hero" style={{
@@ -1203,7 +1217,7 @@ function BenefitsSection(){
       <BenefitGroup
         eyebrow="01 / Партнёр"
         title="Преимущества для партнёра"
-        sub="Что получает бизнес от интеграции Альфа-Кошелька"
+        sub="Что получает бизнес от интеграции xPay"
         items={benefitsPartner}
         accentMode={false}/>
       <BenefitGroup
@@ -1400,7 +1414,7 @@ function Footer(){
           color:"#fff", fontWeight:800, fontSize:13
         }}>A</div>
         <span style={{fontSize:11, color:"var(--text-3)", fontWeight:500, letterSpacing:"-0.005em"}}>
-          АО «Альфа-Банк» · xPlatform · Альфа-Кошелёк · 2026
+          АО «Альфа-Банк» · xPlatform · xPay · 2026
         </span>
       </div>
       <span style={{fontSize:11, color:"var(--text-4)", letterSpacing:"0.04em"}}>
