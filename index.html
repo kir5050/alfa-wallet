@@ -177,6 +177,45 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-r
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+/* Mobile step navigator under phone — hidden on desktop */
+.mobile-step-nav{display:none}
+@media (max-width: 960px){
+  .mobile-step-nav{
+    display:inline-flex;
+    align-items:center;
+    gap:14px;
+    padding:6px 6px;
+    background:var(--surface-1);
+    border:1px solid var(--line-2);
+    border-radius:99px;
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    box-shadow:0 8px 30px rgba(0,0,0,0.25);
+  }
+  .mobile-step-nav button{
+    width:40px;height:40px;
+    border-radius:50%;
+    border:none;
+    background:var(--surface-2);
+    color:var(--text-1);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .2s ease, color .2s ease, transform .15s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-step-nav button:not(:disabled):active{transform:scale(0.94)}
+  .mobile-step-nav button:not(:disabled):hover{background:var(--accent);color:#fff}
+  .mobile-step-nav button:disabled{opacity:.3;cursor:default}
+  .mobile-step-nav .counter{
+    font-size:14px;
+    color:var(--text-2);
+    font-weight:600;
+    letter-spacing:0.02em;
+    min-width:60px;
+    text-align:center;
+  }
+}
+
 @media (max-width: 1100px){
   .hero-grid{grid-template-columns:1fr !important;gap:28px !important;align-items:start !important}
 }
@@ -268,50 +307,50 @@ const EASE = [0.16, 1, 0.3, 1];
    2. DATA — preserved verbatim from the original
    ============================================================ */
 const scenarios=[
-{id:"new",label:"Новый клиент",desc:"Выпуск карты + пополнение + оплата",steps:[
-{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Клиент видит баннер «Скидка до 35% по Альфа-Карте» на чек-ауте приложения партнёра",metricPartner:"Рост конверсии чек-аута на 12-15% за счёт скидочного оффера",metricBank:"Охват: доступ к аудитории партнёра — миллионы MAU без затрат на привлечение"},
+{id:"new",label:"Новый клиент",desc:"Выпуск кошелька + пополнение + оплата",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Клиент видит баннер «Скидка до 35% при оплате xPay» на чек-ауте приложения партнёра",metricPartner:"Рост конверсии чек-аута на 12-15% за счёт скидочного оффера",metricBank:"Охват: доступ к аудитории партнёра — миллионы активных пользователей без рекламных расходов на привлечение"},
 {title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Экран с преимуществами: скидка, бесплатное обслуживание, кэшбэк до 30%. Согласия партнёра и банка",metricPartner:"Скидка от банка за счёт экономии на эквайринге — не из маржи партнёра",metricBank:"Новый клиент банка приходит из готовой аудитории партнёра — без рекламных расходов на привлечение"},
 {title:"Ввод телефона",zone:"Банк (WebView)",screen:"phone",desc:"Клиент вводит номер телефона. Банк отправляет СМС с ОТР-кодом для идентификации",metricPartner:"Бесшовный UX: клиент не покидает приложение партнёра",metricBank:"Идентификация клиента за 20 секунд — без визита в отделение"},
 {title:"Подтверждение OTP",zone:"Банк (WebView)",screen:"otp",desc:"Клиент вводит 4-значный код из СМС. При успешной валидации клиент идентифицирован",metricPartner:"Минимальный отток: 94% клиентов успешно проходят верификацию",metricBank:"Формирование клиентской базы N2B с привязкой к партнёру"},
-{title:"Заполнение анкеты",zone:"Банк (WebView)",screen:"form",desc:"ФИО, дата рождения, гражданство. Предзаполнение из данных партнёра. 2 шага — минимум полей для MVP",metricPartner:"Предзаполнение из данных партнёра — клиент тратит <60 сек на заявку",metricBank:"Новый клиент банка (N2B): выпуск карты без отделения и курьера"},
-{title:"Цифровая карта выпущена",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск предоплаченной карты. Экран успеха с предложением пополнить и заказать пластик",metricPartner:"Клиент готов к покупке через 2 минуты после нажатия на баннер",metricBank:"Моментальный выпуск ЦТ — конверсия в пластик до 60% от входа в воронку"},
-{title:"Пополнение карты",zone:"Банк (WebView)",screen:"topup",desc:"Для нового клиента: C2B-схема — пополнение через платёжный шлюз с карты другого банка",metricPartner:"Среднее пополнение: 2 500 ₽ — сумма, достаточная для покупки",metricBank:"Привлечение остатков из других банков. Рост балансов на счетах"},
-{title:"Заказ пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Банк предлагает заказать пластиковую карту с курьерской доставкой или самовывозом. Цифровая карта остаётся активной — оплата возможна прямо сейчас",metricPartner:"Долгосрочная привязка клиента: пластик с предустановленной связкой с эквайрингом партнёра",metricBank:"Заказ пластика: до 64% клиентов → рост среднего срока жизни клиента и NPS"},
-{title:"Оплата на чек-ауте",zone:"Партнёр",screen:"pay",desc:"Реквизиты ПК автоматически переданы партнёру. Карта привязана к эквайрингу. Клиент видит скидку и платит",metricPartner:"Рост среднего чека +18%, повышение LTV клиента через совместную лояльность",metricBank:"Комиссионный доход от эквайринга. Активация карты = начало транзакционной активности"},
+{title:"Заполнение анкеты",zone:"Банк (WebView)",screen:"form",desc:"ФИО, дата рождения, гражданство. Предзаполнение из данных партнёра. 2 шага — минимум полей для запуска",metricPartner:"Предзаполнение из данных партнёра — клиент тратит <60 сек на заявку",metricBank:"Новый клиент банка (N2B): выпуск кошелька без отделения и курьера"},
+{title:"Кошелёк выпущен",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск цифрового кошелька xPay. Экран успеха с предложением пополнить и заказать пластиковую карту",metricPartner:"Клиент готов к покупке через 2 минуты после нажатия на баннер",metricBank:"Моментальный выпуск цифрового кошелька — конверсия в пластиковую карту до 60% от входа в воронку"},
+{title:"Пополнение кошелька",zone:"Банк (WebView)",screen:"topup",desc:"Для нового клиента: C2B-схема — пополнение через платёжный шлюз с карты другого банка",metricPartner:"Среднее пополнение: 2 500 ₽ — сумма, достаточная для покупки",metricBank:"Привлечение остатков из других банков. Рост балансов на счетах"},
+{title:"Заказ пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Банк предлагает заказать пластиковую карту с курьерской доставкой или самовывозом. Цифровой кошелёк остаётся активным — оплата возможна прямо сейчас",metricPartner:"Долгосрочная привязка клиента: пластик с предустановленной связкой с эквайрингом партнёра",metricBank:"Заказ пластика: до 64% клиентов → рост среднего срока жизни клиента и лояльности"},
+{title:"Оплата на чек-ауте",zone:"Партнёр",screen:"pay",desc:"Реквизиты кошелька автоматически переданы партнёру. Кошелёк привязан к эквайрингу. Клиент видит скидку и платит",metricPartner:"Рост среднего чека +18%, повышение ценности клиента через совместную лояльность",metricBank:"Комиссионный доход от эквайринга. Активация кошелька = начало транзакционной активности"},
 ]},
-{id:"existing",label:"Действующий клиент",desc:"Привязка карты + пополнение + оплата",steps:[
-{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Баннер «Добавить Альфа-Карту к оплате» на чек-ауте. Клиент уже имеет Альфа-Карту, но не привязал её",metricPartner:"Аудитория 20 млн клиентов Альфа-Банка — готовые покупатели с картами",metricBank:"Рост транзакционной активности по существующим картам"},
-{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Согласия на привязку карты и передачу банковской тайны. Памятка ЭДС, СОПД",metricPartner:"Экономия на эквайринге до 30% при оплате Альфа-Картой",metricBank:"Увеличение доли Альфа-Карт в платёжном миксе партнёра"},
+{id:"existing",label:"Действующий клиент",desc:"Подключение кошелька + пополнение + оплата",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Баннер «Подключить xPay к оплате» на чек-ауте. Клиент уже клиент Альфа-Банка, но не подключил xPay в этом канале",metricPartner:"Аудитория 20 млн клиентов Альфа-Банка — готовая база для подключения xPay",metricBank:"Рост транзакционной активности существующих клиентов через новый канал"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Согласия на подключение кошелька и передачу банковской тайны. Памятка ЭДС, СОПД",metricPartner:"Экономия на эквайринге до 30% при оплате через xPay",metricBank:"Увеличение доли xPay в платёжном миксе партнёра"},
 {title:"Идентификация",zone:"Банк (WebView)",screen:"phone",desc:"Ввод номера телефона + ОТР. Банк идентифицирует клиента",metricPartner:"Быстрая привязка — клиент не уходит из приложения",metricBank:"Создание связки «клиент банка — клиент партнёра» для аналитики и кросс-продаж"},
-{title:"Выбор карты",zone:"Банк (WebView)",screen:"select",desc:"WebView отображает все активные карты в маскированном виде. Клиент выбирает карту для оплаты",metricPartner:"Автоматическая привязка — нет ручного ввода реквизитов (рост конверсии)",metricBank:"Данные о предпочтениях клиента: какую карту выбирает для покупок у партнёра"},
-{title:"Пополнение (me2me)",zone:"Банк (WebView)",screen:"topup_me2me",desc:"Если баланс недостаточен — запрос на пополнение через me2me (перевод между своими счетами)",metricPartner:"Клиент не уходит при нехватке средств — пополняет карту прямо в процессе",metricBank:"Консолидация остатков клиента на карте Альфа-Банка"},
-{title:"Оплата со скидкой",zone:"Партнёр",screen:"pay",desc:"Реквизиты переданы → карта привязана к эквайрингу → применяется скидка → клиент платит",metricPartner:"Рост частоты покупок на 25% благодаря совместной программе лояльности",metricBank:"Рост TPV (объём транзакций) по эквайрингу через партнёрский канал"},
+{title:"Выбор карты",zone:"Банк (WebView)",screen:"select",desc:"WebView отображает все активные карты клиента в маскированном виде. Клиент выбирает карту, которая будет использоваться внутри кошелька xPay",metricPartner:"Автоматическая привязка — нет ручного ввода реквизитов (рост конверсии)",metricBank:"Данные о предпочтениях клиента: какую карту выбирает для покупок у партнёра"},
+{title:"Пополнение (me2me)",zone:"Банк (WebView)",screen:"topup_me2me",desc:"Если баланс недостаточен — запрос на пополнение через me2me (перевод между своими счетами)",metricPartner:"Клиент не уходит при нехватке средств — пополняет кошелёк прямо в процессе",metricBank:"Консолидация остатков клиента в кошельке xPay"},
+{title:"Оплата со скидкой",zone:"Партнёр",screen:"pay",desc:"Реквизиты переданы → кошелёк привязан к эквайрингу → применяется скидка → клиент платит",metricPartner:"Рост частоты покупок на 25% благодаря совместной программе лояльности",metricBank:"Рост РТО по эквайрингу через партнёрский канал"},
 ]},
-{id:"no_card",label:"Клиент без активной карты",desc:"Выпуск ДК + привязка + оплата",steps:[
-{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Информер о повышенной скидке по Альфа-Карте",metricPartner:"Реактивация спящих клиентов банка через канал партнёра",metricBank:"Возврат неактивных клиентов: выпуск новой ДК без затрат на ремаркетинг"},
-{title:"Согласия + идентификация",zone:"Банк (WebView)",screen:"consents",desc:"Согласия банка + ввод телефона + OTP. Банк определяет клиента как действующего без активной ДК",metricPartner:"Партнёр получает лояльного клиента с банковской историей",metricBank:"Идентификация по существующему CUS — не нужна полная анкета"},
-{title:"Предложение выпуска",zone:"Банк (WebView)",screen:"upsell",desc:"Экран: «Выпустите бесплатную Альфа-Карту и получите повышенную скидку»",metricPartner:"Дополнительная мотивация к покупке — скидка привязана к новой карте",metricBank:"Конверсия в выпуск ДК: 55% — эффективнее прямых каналов в 3 раза"},
-{title:"Заявка на ДК",zone:"Банк (WebView)",screen:"form",desc:"Заполнение анкеты для выпуска дебетовой карты. Предзаполнение ФИО из данных банка",metricPartner:"Предзаполнение из данных банка — максимально простая заявка для клиента",metricBank:"Выпуск полноценной ДК: долгосрочный продукт с потенциалом кросс-продаж"},
-{title:"Цифровая ДК выпущена",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск цифровой дебетовой карты. Пока пластик доставляется — клиент платит цифровой версией с тем же набором преимуществ",metricPartner:"Клиент готов к покупке через 90 секунд — без ожидания пластика по почте",metricBank:"Активация ДК в день выпуска до 85% — против ~60% в стандартных каналах"},
-{title:"Пополнение карты",zone:"Банк (WebView)",screen:"topup",desc:"C2B-схема: пополнение цифровой ДК с карты другого банка через платёжный шлюз. Клиент получает баланс для немедленной оплаты у партнёра",metricPartner:"Среднее пополнение 2 500 ₽ — достаточно для оплаты с применением скидки",metricBank:"Привлечение остатков из других банков на новую ДК → рост балансов"},
-{title:"Выбор доставки пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Выбор отделения или курьерской доставки. После получения пластика — автоматическая привязка к партнёру",metricPartner:"После активации пластика — автоматическая привязка к оплате у партнёра",metricBank:"Заказ пластика: +64% клиентов → долгосрочная активация и NPS"},
-{title:"Привязка и оплата",zone:"Партнёр",screen:"pay",desc:"После активации ДК — автоматическая передача реквизитов и привязка к оплате через API",metricPartner:"LTV клиента +40% за счёт регулярных покупок с кэшбэком",metricBank:"Полноценный активный клиент с ДК, транзакционной историей и балансом"},
+{id:"no_card",label:"Клиент без активной карты",desc:"Выпуск кошелька + подключение + оплата",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Информер о повышенной скидке при оплате xPay",metricPartner:"Реактивация спящих клиентов банка через канал партнёра",metricBank:"Возврат неактивных клиентов: выпуск нового кошелька без затрат на повторное привлечение"},
+{title:"Согласия + идентификация",zone:"Банк (WebView)",screen:"consents",desc:"Согласия банка + ввод телефона + OTP. Банк определяет клиента как действующего, но без активного кошелька",metricPartner:"Партнёр получает лояльного клиента с банковской историей",metricBank:"Идентификация по существующему CUS — не нужна полная анкета"},
+{title:"Предложение выпуска",zone:"Банк (WebView)",screen:"upsell",desc:"Экран: «Подключите бесплатный кошелёк xPay и получите повышенную скидку»",metricPartner:"Дополнительная мотивация к покупке — скидка привязана к новому кошельку",metricBank:"Конверсия в выпуск кошелька: 55% — эффективнее прямых каналов в 3 раза"},
+{title:"Заявка на кошелёк",zone:"Банк (WebView)",screen:"form",desc:"Заполнение анкеты для выпуска кошелька. Предзаполнение ФИО из данных банка",metricPartner:"Предзаполнение из данных банка — максимально простая заявка для клиента",metricBank:"Выпуск полноценного кошелька: долгосрочный продукт с потенциалом кросс-продаж"},
+{title:"Кошелёк выпущен",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск цифрового кошелька. Пока пластиковая карта доставляется — клиент платит цифровым кошельком с тем же набором преимуществ",metricPartner:"Клиент готов к покупке через 90 секунд — без ожидания пластика по почте",metricBank:"Активация кошелька в день выпуска до 85% — против ~60% в стандартных каналах"},
+{title:"Пополнение кошелька",zone:"Банк (WebView)",screen:"topup",desc:"C2B-схема: пополнение цифрового кошелька с карты другого банка через платёжный шлюз. Клиент получает баланс для немедленной оплаты у партнёра",metricPartner:"Среднее пополнение 2 500 ₽ — достаточно для оплаты с применением скидки",metricBank:"Привлечение остатков из других банков в новый кошелёк → рост балансов"},
+{title:"Выбор доставки пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Выбор отделения или курьерской доставки. После получения пластика — автоматическая привязка к партнёру",metricPartner:"После активации пластика — автоматическая привязка к оплате у партнёра",metricBank:"Заказ пластика: +64% клиентов → долгосрочная активация и лояльность"},
+{title:"Привязка и оплата",zone:"Партнёр",screen:"pay",desc:"После активации кошелька — автоматическая передача реквизитов и привязка к оплате через API",metricPartner:"Ценность клиента +40% за счёт регулярных покупок с кэшбэком",metricBank:"Полноценный активный клиент с кошельком, транзакционной историей и балансом"},
 ]}
 ];
 
 const benefitsPartner=[
-{icon:"gift",title:"Экономия на эквайринге",desc:"Сниженная ставка за транзакции по Альфа-Карте — экономия до 30% vs обычный interchange",accent:"30%"},
-{icon:"users",title:"20 млн готовых клиентов",desc:"Альфа-Банк приводит платёжеспособную аудиторию в канал партнёра",accent:"20M"},
+{icon:"gift",title:"Экономия на эквайринге",desc:"Сниженная ставка за транзакции через xPay — экономия до 30% от стандартной межбанковской комиссии",accent:"30%"},
+{icon:"users",title:"20 млн готовых клиентов",desc:"Альфа-Банк приводит платёжеспособную аудиторию в канал партнёра",accent:"20 млн"},
 {icon:"trend",title:"Рост среднего чека +18%",desc:"Клиенты с xPay тратят больше за счёт кэшбэка и скидок",accent:"+18%"},
 {icon:"refresh",title:"Частота покупок +25%",desc:"Совместная лояльность мотивирует возвращаться к партнёру",accent:"+25%"},
 {icon:"sparkle",title:"Совместные офферы",desc:"Скидки финансируются банком из экономии на эквайринге, не из маржи партнёра"},
-{icon:"shield",title:"BNPL / рассрочка",desc:"Дополнительный инструмент увеличения конверсии и чека"},
+{icon:"shield",title:"Рассрочка",desc:"Дополнительный инструмент увеличения конверсии и чека"},
 ];
 const benefitsBank=[
 {icon:"users",title:"N2B: новые клиенты",desc:"N2B: привлечение клиентов через готовую аудиторию партнёра — масштабный канал в дополнение к прямым медиа",accent:"N2B"},
-{icon:"card",title:"Выпуск карт",desc:"Моментальный выпуск ПК/ДК в канале партнёра — конверсия до 50% от входа в воронку",accent:"до 50%"},
-{icon:"chart",title:"Рост TPV",desc:"Объём транзакций по эквайрингу через партнёрскую сеть"},
-{icon:"savings",title:"Привлечение остатков",desc:"Пополнение карт из других банков — рост балансов на счетах Альфа-Банка"},
+{icon:"card",title:"Выпуск кошельков",desc:"Моментальный выпуск кошелька в канале партнёра — конверсия до 50% от входа в воронку",accent:"до 50%"},
+{icon:"chart",title:"Рост РТО",desc:"Розничный товарооборот по эквайрингу через партнёрскую сеть"},
+{icon:"savings",title:"Привлечение остатков",desc:"Пополнение кошелька с карт других банков — рост балансов на счетах Альфа-Банка"},
 {icon:"data",title:"Данные и аналитика",desc:"Связка «клиент банка — покупатель партнёра» для таргетированных продуктов"},
 {icon:"link",title:"Кросс-продажи",desc:"Кредиты, страхование, инвестиции — на базе транзакционной истории у партнёра"},
 ];
@@ -395,16 +434,16 @@ const SCREENS = {
         <div style={{position:"absolute",top:10,right:12,width:24,height:24,borderRadius:6,background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13}}>A</div>
         <div style={{fontSize:10,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>Вам доступно</div>
         <div className="num" style={{fontSize:36,fontWeight:800,letterSpacing:"-.03em",lineHeight:1,marginTop:4}}>−35%</div>
-        <div style={{fontSize:11,opacity:.7,marginTop:4}}>По Альфа-Карте</div>
-        <div style={{background:"var(--accent)",color:"#fff",borderRadius:9,padding:"9px 0",marginTop:14,fontWeight:600,fontSize:12,textAlign:"center"}}>Добавить Альфа-Карту</div>
+        <div style={{fontSize:11,opacity:.7,marginTop:4}}>При оплате xPay</div>
+        <div style={{background:"var(--accent)",color:"#fff",borderRadius:9,padding:"9px 0",marginTop:14,fontWeight:600,fontSize:12,textAlign:"center"}}>Подключить xPay</div>
       </div>
     </div>
   )},
   consents:{title:"Оффер + согласия", render:()=>(
     <div style={{padding:"16px"}}>
       <div style={{width:40,height:40,background:"var(--accent)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:20,fontWeight:800,marginBottom:12}}>A</div>
-      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Платите Альфа-Картой</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:4,marginBottom:14}}>Оформите карту и сделайте заказ со скидкой</div>
+      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Платите через xPay</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:4,marginBottom:14}}>Подключите кошелёк и сделайте заказ со скидкой</div>
       {["Скидка до 35%","Бесплатно навсегда","Кэшбэк до 30%"].map((t,i)=>(
         <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderTop:i===0?"1px solid var(--phone-line-1)":"none",borderBottom:"1px solid var(--phone-line-1)",fontSize:12,color:"var(--phone-text-1)",fontWeight:500}}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-6" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>{t}
@@ -462,16 +501,16 @@ const SCREENS = {
       <div style={{marginTop:14}}>{PBtn("Продолжить")}</div>
     </div>
   )},
-  issued:{title:"Карта выпущена!", render:()=>(
+  issued:{title:"Кошелёк выпущен", render:()=>(
     <div style={{padding:16,textAlign:"center"}}>
       <div style={{width:44,height:44,border:"1.5px solid var(--accent)",borderRadius:"50%",margin:"0 auto 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </div>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Цифровая карта выпущена!</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.4}}>Пополните её и получайте скидку. Закажите пластиковую карту для максимальной выгоды</div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Кошелёк xPay выпущен!</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.4}}>Пополните кошелёк и получайте скидку. Закажите пластиковую карту для максимальной выгоды</div>
       <div style={{background:"#0A0A0A",borderRadius:12,padding:14,color:"#fff",textAlign:"left",marginBottom:14,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:12,right:14,width:22,height:22,borderRadius:5,background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:12}}>A</div>
-        <div style={{fontSize:9,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>Альфа карта</div>
+        <div style={{fontSize:9,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>xPay</div>
         <div className="num" style={{fontSize:15,fontWeight:600,letterSpacing:"0.3em",marginTop:10}}>•••• 4567</div>
         <div className="num" style={{fontSize:10,marginTop:6,opacity:.6}}>Баланс: 0 ₽</div>
       </div>
@@ -489,14 +528,14 @@ const SCREENS = {
     <div style={{padding:16}}>
       <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Запрос на пополнение</div>
       <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:12}}>Перевод между своими счетами</div>
-      {[{l:"Сумма",v:"2 729 ₽"},{l:"Банк списания",v:"Альфа-Банк"},{l:"Куда",v:"Альфа-Карта ****4567",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
+      {[{l:"Сумма",v:"2 729 ₽"},{l:"Банк списания",v:"Альфа-Банк"},{l:"Куда",v:"xPay ****4567",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
       <div style={{marginTop:16}}>{PBtn("Подтвердить")}</div>
     </div>
   )},
   select:{title:"Выбор карты", render:()=>(
     <div style={{padding:16}}>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Выберите карту для оплаты</div>
-      {[{n:"Альфа карта",num:"****4567",bal:"15 200 ₽",sel:true},{n:"Альфа карта",num:"****3456",bal:"1 100 ₽",sel:false}].map((c,i)=>(
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Выберите карту в кошельке</div>
+      {[{n:"Карта Альфа-Банка",num:"****4567",bal:"15 200 ₽",sel:true},{n:"Карта Альфа-Банка",num:"****3456",bal:"1 100 ₽",sel:false}].map((c,i)=>(
         <div key={i} style={{background:"#fff",border:c.sel?"1.5px solid var(--accent)":"1px solid var(--phone-line-1)",borderRadius:12,padding:"10px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:36,height:26,background:"var(--phone-text-1)",borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center"}}>
             <div style={{width:10,height:10,borderRadius:3,background:"var(--accent)"}}/></div>
@@ -517,7 +556,7 @@ const SCREENS = {
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </div>
       <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Готово к оплате!</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px"}}>Альфа-Карта привязана к чек-ауту</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px"}}>Кошелёк xPay привязан к чек-ауту</div>
       <div style={{textAlign:"left",borderTop:"1px solid var(--phone-line-1)",paddingTop:10}}>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--phone-text-2)",padding:"6px 0"}}>
           <span>Заказ</span><span className="num" style={{textDecoration:"line-through"}}>2 729 ₽</span></div>
@@ -533,9 +572,9 @@ const SCREENS = {
   upsell:{title:"Предложение выпуска", render:()=>(
     <div style={{padding:"18px 16px",textAlign:"center"}}>
       <div style={{width:40,height:40,background:"var(--accent)",borderRadius:10,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:20,fontWeight:800}}>A</div>
-      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Выпустите бесплатную Альфа-Карту</div>
-      <div style={{fontSize:12,color:"var(--phone-text-2)",margin:"8px 0 16px",lineHeight:1.4}}>и получите повышенную скидку. Карта будет привязана автоматически.</div>
-      {PBtn("Оформить карту")}
+      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Подключите бесплатный кошелёк xPay</div>
+      <div style={{fontSize:12,color:"var(--phone-text-2)",margin:"8px 0 16px",lineHeight:1.4}}>и получите повышенную скидку. Кошелёк будет привязан автоматически.</div>
+      {PBtn("Подключить xPay")}
     </div>
   )},
   delivery:{title:"Заказ пластика", render:()=>(
@@ -783,6 +822,7 @@ function Hero({activeScenario, setActiveScenario}){
             letterSpacing:"-0.05em",
             lineHeight:0.92,
             margin:0,
+            paddingBottom:"0.18em",
             color:"var(--text-1)"
           }}>
             {titleParts.map((part, i)=>(
@@ -1171,9 +1211,45 @@ function MetricCell({label, text, accent, style, cls}){
 /* ============================================================
    12. CJM SECTION — phone + info panel
    ============================================================ */
+function MobileStepNav({current, total, onPrev, onNext}){
+  // Only visible on mobile via CSS (.mobile-step-nav)
+  const atStart = current === 0;
+  const atEnd = current === total - 1;
+  return (
+    <div className="mobile-step-nav" role="group" aria-label="Навигация по шагам">
+      <button
+        type="button"
+        aria-label="Предыдущий шаг"
+        disabled={atStart}
+        onClick={onPrev}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      <div className="counter num">
+        <span style={{color:"var(--text-1)"}}>{String(current+1).padStart(2,"0")}</span>
+        <span style={{opacity:.4,margin:"0 6px"}}>/</span>
+        <span style={{color:"var(--text-3)"}}>{String(total).padStart(2,"0")}</span>
+      </div>
+      <button
+        type="button"
+        aria-label="Следующий шаг"
+        disabled={atEnd}
+        onClick={onNext}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M7 4l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 function CJMSection({activeScenario, activeStep, setActiveStep, showMetrics}){
   const sc = scenarios[activeScenario];
-  const step = sc.steps[activeStep];
+  // Defensive clamp: when scenario changes, activeStep may briefly exceed
+  // the new scenario's range before the reset useEffect fires.
+  const safeStep = Math.min(activeStep, sc.steps.length - 1);
+  const step = sc.steps[safeStep];
 
   return (
     <section className="section" style={{
@@ -1183,7 +1259,7 @@ function CJMSection({activeScenario, activeStep, setActiveStep, showMetrics}){
     }}>
       <ProgressRail
         steps={sc.steps}
-        active={activeStep}
+        active={safeStep}
         onPick={setActiveStep}/>
 
       <div className="work-grid" style={{
@@ -1192,10 +1268,23 @@ function CJMSection({activeScenario, activeStep, setActiveStep, showMetrics}){
         gap:80,
         alignItems:"start"
       }}>
-        <Phone screenKey={step.screen}/>
+        <div className="phone-wrap" style={{
+          display:"flex",
+          flexDirection:"column",
+          alignItems:"center",
+          justifyContent:"center",
+          gap:20
+        }}>
+          <Phone screenKey={step.screen}/>
+          <MobileStepNav
+            current={safeStep}
+            total={sc.steps.length}
+            onPrev={()=>setActiveStep(p=>Math.max(0, p-1))}
+            onNext={()=>setActiveStep(p=>Math.min(sc.steps.length-1, p+1))}/>
+        </div>
         <StepInfo
           step={step}
-          stepIdx={activeStep}
+          stepIdx={safeStep}
           totalSteps={sc.steps.length}
           showMetrics={showMetrics}
           onPrev={()=>setActiveStep(p=>Math.max(0, p-1))}
