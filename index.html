@@ -730,7 +730,7 @@ function Navbar({showMetrics, setShowMetrics, scrolled}){
       animate={{opacity:1, y:0}}
       transition={{duration:0.6, ease:EASE, delay:0.1}}
       style={{
-        position:"sticky", top:0, zIndex:50,
+        position:"relative", zIndex:50,
         backdropFilter:scrolled?"blur(20px) saturate(140%)":"blur(0px)",
         WebkitBackdropFilter:scrolled?"blur(20px) saturate(140%)":"blur(0px)",
         background:scrolled?"rgba(5,5,5,0.7)":"transparent",
@@ -822,7 +822,8 @@ function Hero({activeScenario, setActiveScenario}){
             letterSpacing:"-0.05em",
             lineHeight:0.92,
             margin:0,
-            paddingBottom:"0.18em",
+            paddingBottom:"0.3em",
+            overflow:"visible",
             color:"var(--text-1)"
           }}>
             {titleParts.map((part, i)=>(
@@ -833,6 +834,7 @@ function Hero({activeScenario, setActiveScenario}){
                 transition={{duration:0.9, ease:EASE, delay:0.35 + i*0.18}}
                 style={{
                   display:"inline-block",
+                  paddingBottom:"0.15em",
                   color: i===1 ? "var(--accent)" : "var(--text-1)",
                   background: i===1 ? "linear-gradient(180deg, #FF4736 0%, #EF3124 60%, #C81E14 100%)" : undefined,
                   WebkitBackgroundClip: i===1 ? "text" : undefined,
