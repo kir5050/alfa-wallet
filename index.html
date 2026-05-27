@@ -307,52 +307,82 @@ const EASE = [0.16, 1, 0.3, 1];
    2. DATA — preserved verbatim from the original
    ============================================================ */
 const scenarios=[
-{id:"new",label:"Новый клиент",desc:"Выпуск кошелька + пополнение + оплата",steps:[
-{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Клиент видит баннер «Скидка до 35% при оплате xPay» на чек-ауте приложения партнёра",metricPartner:"Рост конверсии чек-аута на 12-15% за счёт скидочного оффера",metricBank:"Охват: доступ к аудитории партнёра — миллионы активных пользователей без рекламных расходов на привлечение"},
-{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Экран с преимуществами: скидка, бесплатное обслуживание, кэшбэк до 30%. Согласия партнёра и банка",metricPartner:"Скидка от банка за счёт экономии на эквайринге — не из маржи партнёра",metricBank:"Новый клиент банка приходит из готовой аудитории партнёра — без рекламных расходов на привлечение"},
-{title:"Ввод телефона",zone:"Банк (WebView)",screen:"phone",desc:"Клиент вводит номер телефона. Банк отправляет СМС с ОТР-кодом для идентификации",metricPartner:"Бесшовный UX: клиент не покидает приложение партнёра",metricBank:"Идентификация клиента за 20 секунд — без визита в отделение"},
-{title:"Подтверждение OTP",zone:"Банк (WebView)",screen:"otp",desc:"Клиент вводит 4-значный код из СМС. При успешной валидации клиент идентифицирован",metricPartner:"Минимальный отток: 94% клиентов успешно проходят верификацию",metricBank:"Формирование клиентской базы N2B с привязкой к партнёру"},
-{title:"Заполнение анкеты",zone:"Банк (WebView)",screen:"form",desc:"ФИО, дата рождения, гражданство. Предзаполнение из данных партнёра. 2 шага — минимум полей для запуска",metricPartner:"Предзаполнение из данных партнёра — клиент тратит <60 сек на заявку",metricBank:"Новый клиент банка (N2B): выпуск кошелька без отделения и курьера"},
-{title:"Кошелёк выпущен",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск цифрового кошелька xPay. Экран успеха с предложением пополнить и заказать пластиковую карту",metricPartner:"Клиент готов к покупке через 2 минуты после нажатия на баннер",metricBank:"Моментальный выпуск цифрового кошелька — конверсия в пластиковую карту до 60% от входа в воронку"},
-{title:"Пополнение кошелька",zone:"Банк (WebView)",screen:"topup",desc:"Для нового клиента: C2B-схема — пополнение через платёжный шлюз с карты другого банка",metricPartner:"Среднее пополнение: 2 500 ₽ — сумма, достаточная для покупки",metricBank:"Привлечение остатков из других банков. Рост балансов на счетах"},
-{title:"Заказ пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Банк предлагает заказать пластиковую карту с курьерской доставкой или самовывозом. Цифровой кошелёк остаётся активным — оплата возможна прямо сейчас",metricPartner:"Долгосрочная привязка клиента: пластик с предустановленной связкой с эквайрингом партнёра",metricBank:"Заказ пластика: до 64% клиентов → рост среднего срока жизни клиента и лояльности"},
-{title:"Оплата на чек-ауте",zone:"Партнёр",screen:"pay",desc:"Реквизиты кошелька автоматически переданы партнёру. Кошелёк привязан к эквайрингу. Клиент видит скидку и платит",metricPartner:"Рост среднего чека +18%, повышение ценности клиента через совместную лояльность",metricBank:"Комиссионный доход от эквайринга. Активация кошелька = начало транзакционной активности"},
+{id:"new",label:"Новый клиент",desc:"Выпуск xPay кошелька + пополнение + автопривязка + оплата",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Клиент видит баннер xPay на чек-ауте приложения партнёра и понимает выгоду оплаты кошельком прямо в момент покупки.",metricPartner:"Встроенный оффер xPay усиливает конверсию на финальном шаге оформления заказа",metricBank:"Партнёрский сценарий расширяет присутствие xPay в целевой аудитории и усиливает дистрибуцию продукта"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Клиент знакомится с условиями xPay и даёт согласия на подключение кошелька, передачу реквизитов и обработку данных.",metricPartner:"Выгода клиента объясняется прямо в чек-ауте и не требует отдельного обучения продукту",metricBank:"Подключение xPay происходит в момент покупки и снижает барьер первой активации кошелька"},
+{title:"Идентификация клиента",zone:"Банк (WebView)",screen:"phone",desc:"Клиент вводит номер телефона для идентификации внутри встроенного банковского контура.",metricPartner:"Клиент не покидает приложение партнёра и проходит шаг в привычном интерфейсе",metricBank:"Дистанционная идентификация сразу подготавливает выпуск xPay кошелька"},
+{title:"Подтверждение OTP",zone:"Банк (WebView)",screen:"otp",desc:"Клиент подтверждает вход кодом из СМС.",metricPartner:"Короткий шаг подтверждения сохраняет темп оформления заказа",metricBank:"Подтверждённый номер снижает риск ошибки на этапе выпуска"},
+{title:"Заполнение анкеты",zone:"Банк (WebView)",screen:"form",desc:"ФИО и дата рождения предзаполняются из доступных данных — клиенту остаётся подтвердить заявку на выпуск кошелька.",metricPartner:"Минимум полей ускоряет анкету и снижает отток",metricBank:"Выпуск xPay кошелька происходит без отделения и дополнительных каналов"},
+{title:"xPay кошелёк выпущен",zone:"Банк (WebView)",screen:"issued",desc:"Кошелёк выпускается моментально и готов к пополнению и дальнейшей оплате.",metricPartner:"Клиент готов продолжить покупку сразу после выпуска",metricBank:"Моментальный выпуск ускоряет первую оплату и активацию кошелька"},
+{title:"Выбор банка",zone:"Банк (WebView)",screen:"topup_bank_list",desc:"Клиент выбирает банк, с которого переведёт деньги в xPay кошелёк.",metricPartner:"Понятный выбор банка делает пополнение прозрачным и удерживает клиента в сценарии",metricBank:"Перевод в xPay кошелёк оформляется в одном контуре без лишних переходов"},
+{title:"Пополнение xPay кошелька",zone:"Банк (WebView)",screen:"topup",desc:"Клиент пополняет xPay кошелёк с карты другого банка. Средства сразу готовы к оплате заказа.",metricPartner:"Сумма заказа появляется в кошельке прямо на чек-ауте",metricBank:"Внешние деньги перетекают в xPay кошелёк и на баланс банка"},
+{title:"Автопривязка к xPay",zone:"Банк → Партнёр",screen:"wallet_auto_bind",desc:"После пополнения xPay кошелёк автоматически становится доступным как способ оплаты у партнёра.",metricPartner:"Способ оплаты подключается автоматически — без ручного ввода реквизитов",metricBank:"xPay закрепляется в платёжном сценарии партнёра как готовый способ оплаты"},
+{title:"Заказ пластика",zone:"Банк (WebView)",screen:"delivery",desc:"При необходимости клиент выбирает получение пластиковой карты для xPay кошелька — курьером или в отделении.",metricPartner:"Физический носитель повышает долгосрочное использование кошелька",metricBank:"Пластиковая карта поддерживает дальнейшую вовлечённость в xPay"},
+{title:"Оплата на чек-ауте",zone:"Партнёр",screen:"pay",desc:"Клиент оплачивает заказ через xPay кошелёк. Выгода применяется автоматически.",metricPartner:"Оплата внутри xPay повышает завершение заказа и воспринимаемую ценность сценария",metricBank:"Первая транзакция превращает выпущенный кошелёк в активный платёжный инструмент"},
 ]},
-{id:"existing",label:"Действующий клиент",desc:"Подключение кошелька + пополнение + оплата",steps:[
-{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Баннер «Подключить xPay к оплате» на чек-ауте. Клиент уже клиент Альфа-Банка, но не подключил xPay в этом канале",metricPartner:"Аудитория 20 млн клиентов Альфа-Банка — готовая база для подключения xPay",metricBank:"Рост транзакционной активности существующих клиентов через новый канал"},
-{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Согласия на подключение кошелька и передачу банковской тайны. Памятка ЭДС, СОПД",metricPartner:"Экономия на эквайринге до 30% при оплате через xPay",metricBank:"Увеличение доли xPay в платёжном миксе партнёра"},
-{title:"Идентификация",zone:"Банк (WebView)",screen:"phone",desc:"Ввод номера телефона + ОТР. Банк идентифицирует клиента",metricPartner:"Быстрая привязка — клиент не уходит из приложения",metricBank:"Создание связки «клиент банка — клиент партнёра» для аналитики и кросс-продаж"},
-{title:"Выбор карты",zone:"Банк (WebView)",screen:"select",desc:"WebView отображает все активные карты клиента в маскированном виде. Клиент выбирает карту, которая будет использоваться внутри кошелька xPay",metricPartner:"Автоматическая привязка — нет ручного ввода реквизитов (рост конверсии)",metricBank:"Данные о предпочтениях клиента: какую карту выбирает для покупок у партнёра"},
-{title:"Пополнение (me2me)",zone:"Банк (WebView)",screen:"topup_me2me",desc:"Если баланс недостаточен — запрос на пополнение через me2me (перевод между своими счетами)",metricPartner:"Клиент не уходит при нехватке средств — пополняет кошелёк прямо в процессе",metricBank:"Консолидация остатков клиента в кошельке xPay"},
-{title:"Оплата со скидкой",zone:"Партнёр",screen:"pay",desc:"Реквизиты переданы → кошелёк привязан к эквайрингу → применяется скидка → клиент платит",metricPartner:"Рост частоты покупок на 25% благодаря совместной программе лояльности",metricBank:"Рост РТО по эквайрингу через партнёрский канал"},
+{id:"existing",label:"Действующий клиент",desc:"Подключение xPay кошелька + выбор карты или выпуск новой + пополнение + оплата",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"На чек-ауте клиенту предлагается подключить xPay как быстрый способ оплаты внутри приложения партнёра.",metricPartner:"Готовая банковская аудитория ускоряет подключение xPay в момент покупки",metricBank:"Существующие клиенты получают новый транзакционный сценарий внутри партнёрского канала"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Клиент принимает условия подключения xPay и разрешает банку передать реквизиты способа оплаты партнёру.",metricPartner:"Подключение xPay встроено в покупку и не выглядит отдельным банковским процессом",metricBank:"xPay становится частью регулярной оплаты в партнёрском канале"},
+{title:"Идентификация клиента",zone:"Банк (WebView)",screen:"phone",desc:"Клиент подтверждает номер телефона в банковском контуре.",metricPartner:"Бесшовная идентификация без выхода из приложения партнёра",metricBank:"Связка клиента банка и клиента партнёра становится доступна для продуктовой аналитики"},
+{title:"Выбор карты или выпуск новой",zone:"Банк (WebView)",screen:"select",desc:"Клиент может привязать действующую карту к xPay кошельку или выпустить новую карту специально для кошелька.",metricPartner:"Клиент сам выбирает удобный вариант подключения — без ручного ввода реквизитов",metricBank:"Сценарий поддерживает и быстрый запуск на действующей карте, и выпуск новой карты под xPay"},
+{title:"xPay кошелёк подключён",zone:"Банк (WebView)",screen:"wallet_ready",desc:"xPay кошелёк готов к оплате и отображается как подключённый инструмент клиента.",metricPartner:"Кошелёк активируется в один сценарий и сразу готов к покупке",metricBank:"Активированный xPay кошелёк становится готовым к транзакциям"},
+{title:"Пополнение xPay кошелька",zone:"Банк (WebView)",screen:"topup_me2me",desc:"Если средств не хватает, клиент переводит деньги между своими счетами прямо в xPay кошелёк.",metricPartner:"Нехватка средств не ломает чек-аут — пополнение происходит внутри сценария",metricBank:"Остатки клиента консолидируются в xPay кошельке"},
+{title:"Автопривязка к xPay",zone:"Банк → Партнёр",screen:"wallet_auto_bind",desc:"xPay кошелёк автоматически привязывается к способу оплаты у партнёра после подтверждения подключения.",metricPartner:"Переход к оплате не требует ручной настройки способа оплаты",metricBank:"xPay занимает место среди ключевых платёжных способов у партнёра"},
+{title:"Оплата со скидкой",zone:"Партнёр",screen:"pay",desc:"Клиент оплачивает заказ через xPay кошелёк. Выгода применяется автоматически.",metricPartner:"Совместная выгода повышает частоту повторных покупок",metricBank:"Рост оборота через партнёрский канал начинается уже с первого платежа"},
 ]},
-{id:"no_card",label:"Клиент без активной карты",desc:"Выпуск кошелька + подключение + оплата",steps:[
-{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Информер о повышенной скидке при оплате xPay",metricPartner:"Реактивация спящих клиентов банка через канал партнёра",metricBank:"Возврат неактивных клиентов: выпуск нового кошелька без затрат на повторное привлечение"},
-{title:"Согласия + идентификация",zone:"Банк (WebView)",screen:"consents",desc:"Согласия банка + ввод телефона + OTP. Банк определяет клиента как действующего, но без активного кошелька",metricPartner:"Партнёр получает лояльного клиента с банковской историей",metricBank:"Идентификация по существующему CUS — не нужна полная анкета"},
-{title:"Предложение выпуска",zone:"Банк (WebView)",screen:"upsell",desc:"Экран: «Подключите бесплатный кошелёк xPay и получите повышенную скидку»",metricPartner:"Дополнительная мотивация к покупке — скидка привязана к новому кошельку",metricBank:"Конверсия в выпуск кошелька: 55% — эффективнее прямых каналов в 3 раза"},
-{title:"Заявка на кошелёк",zone:"Банк (WebView)",screen:"form",desc:"Заполнение анкеты для выпуска кошелька. Предзаполнение ФИО из данных банка",metricPartner:"Предзаполнение из данных банка — максимально простая заявка для клиента",metricBank:"Выпуск полноценного кошелька: долгосрочный продукт с потенциалом кросс-продаж"},
-{title:"Кошелёк выпущен",zone:"Банк (WebView)",screen:"issued",desc:"Моментальный выпуск цифрового кошелька. Пока пластиковая карта доставляется — клиент платит цифровым кошельком с тем же набором преимуществ",metricPartner:"Клиент готов к покупке через 90 секунд — без ожидания пластика по почте",metricBank:"Активация кошелька в день выпуска до 85% — против ~60% в стандартных каналах"},
-{title:"Пополнение кошелька",zone:"Банк (WebView)",screen:"topup",desc:"C2B-схема: пополнение цифрового кошелька с карты другого банка через платёжный шлюз. Клиент получает баланс для немедленной оплаты у партнёра",metricPartner:"Среднее пополнение 2 500 ₽ — достаточно для оплаты с применением скидки",metricBank:"Привлечение остатков из других банков в новый кошелёк → рост балансов"},
-{title:"Выбор доставки пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Выбор отделения или курьерской доставки. После получения пластика — автоматическая привязка к партнёру",metricPartner:"После активации пластика — автоматическая привязка к оплате у партнёра",metricBank:"Заказ пластика: +64% клиентов → долгосрочная активация и лояльность"},
-{title:"Привязка и оплата",zone:"Партнёр",screen:"pay",desc:"После активации кошелька — автоматическая передача реквизитов и привязка к оплате через API",metricPartner:"Ценность клиента +40% за счёт регулярных покупок с кэшбэком",metricBank:"Полноценный активный клиент с кошельком, транзакционной историей и балансом"},
+{id:"no_card",label:"Без активной карты",desc:"Выпуск xPay кошелька + пополнение + пластик + оплата",steps:[
+{title:"Точка входа",zone:"Партнёр",screen:"offer",desc:"Информер о выгоде при оплате xPay на чек-ауте помогает реактивировать клиента.",metricPartner:"Реактивация клиентской базы идёт прямо в сценарии покупки",metricBank:"Партнёрский канал помогает вернуть клиента в активный платёжный контур xPay"},
+{title:"Оффер + согласия",zone:"Партнёр → Банк",screen:"consents",desc:"Клиент даёт согласия на выпуск xPay кошелька и подтверждает дальнейшее подключение.",metricPartner:"Сценарий остаётся коротким даже для клиента без активной карты",metricBank:"xPay можно запустить без полного переобучения клиента банковскому пути"},
+{title:"Идентификация клиента",zone:"Банк (WebView)",screen:"phone",desc:"Клиент вводит номер телефона и продолжает выпуск кошелька.",metricPartner:"Идентификация проходит быстро и не ломает UX покупки",metricBank:"Банк быстро определяет клиента и подготавливает выпуск xPay"},
+{title:"Подтверждение OTP",zone:"Банк (WebView)",screen:"otp",desc:"Подтверждение кодом из СМС.",metricPartner:"Дополнительная верификация не перегружает сценарий",metricBank:"Подтверждённый вход повышает качество клиентского пути"},
+{title:"Предложение выпуска",zone:"Банк (WebView)",screen:"upsell",desc:"Клиенту предлагается открыть xPay кошелёк и продолжить оплату через него.",metricPartner:"Новый кошелёк напрямую связан с выгодой в текущей покупке",metricBank:"Выпуск xPay происходит в продуктово релевантный момент"},
+{title:"Заявка на кошелёк",zone:"Банк (WebView)",screen:"form",desc:"Короткая анкета на выпуск xPay кошелька.",metricPartner:"Минимум полей ускоряет конверсию в выпуск",metricBank:"Кошелёк оформляется без лишних каналов и ожидания"},
+{title:"xPay кошелёк выпущен",zone:"Банк (WebView)",screen:"issued",desc:"Кошелёк уже активен и готов к пополнению.",metricPartner:"Клиент может оплатить без ожидания пластика",metricBank:"Кошелёк активируется в день выпуска"},
+{title:"Выбор банка",zone:"Банк (WebView)",screen:"topup_bank_list",desc:"Клиент выбирает банк для перевода денег в xPay кошелёк.",metricPartner:"Выбор банка встроен в сценарий и не требует ручных пояснений",metricBank:"Путь к пополнению xPay остаётся прозрачным"},
+{title:"Пополнение xPay кошелька",zone:"Банк (WebView)",screen:"topup",desc:"Клиент переводит деньги в xPay кошелёк и получает баланс для покупки.",metricPartner:"Сумма появляется в кошельке прямо перед оплатой",metricBank:"Перевод денег извне усиливает баланс xPay кошелька"},
+{title:"Автопривязка к xPay",zone:"Банк → Партнёр",screen:"wallet_auto_bind",desc:"xPay кошелёк автоматически привязывается к способу оплаты партнёра.",metricPartner:"Не нужно вручную добавлять новый платёжный инструмент",metricBank:"xPay моментально включается в оплату у партнёра"},
+{title:"Выбор доставки пластика",zone:"Банк (WebView)",screen:"delivery",desc:"Клиент может сразу выбрать получение пластиковой карты для xPay кошелька.",metricPartner:"Пластиковая карта усиливает долгосрочное использование кошелька",metricBank:"Пластик помогает закрепить xPay в повседневном использовании"},
+{title:"Оплата через xPay",zone:"Партнёр",screen:"pay",desc:"Клиент оплачивает заказ через xPay кошелёк после автоматической привязки.",metricPartner:"Сценарий доводит клиента до покупки без разрывов",metricBank:"Оплата запускает реальную транзакционную активность xPay"},
+]},
+{id:"manage",label:"Управление кошельком",desc:"Баланс + пополнение + перевод + действия по xPay кошельку",steps:[
+{title:"Главный экран xPay",zone:"Партнёр / xPay",screen:"manage_home",desc:"Клиент открывает xPay кошелёк из профиля партнёра и видит баланс, карту быстрых действий и историю операций.",metricPartner:"Кошелёк остаётся под рукой внутри приложения партнёра",metricBank:"Регулярные заходы в xPay повышают вовлечённость"},
+{title:"Пополнение кошелька",zone:"xPay",screen:"manage_topup",desc:"Клиент может пополнить xPay кошелёк со счёта в другом банке или между своими счетами.",metricPartner:"Деньги на следующую покупку доступны в пару тапов",metricBank:"Пополнение поддерживает остатки в xPay кошельке"},
+{title:"Перевод на xPay кошелёк",zone:"xPay",screen:"manage_transfer",desc:"Перевод денег отображается как перевод именно в xPay кошелёк, а не на карту банка.",metricPartner:"Продукт воспринимается как часть партнёрского опыта",metricBank:"Единая продуктовая модель xPay становится понятнее клиенту"},
+{title:"Действия по кошельку",zone:"xPay",screen:"manage_actions",desc:"Клиент может поменять пин, заморозить карту, настроить автопополнение и посмотреть условия.",metricPartner:"Самообслуживание снижает нагрузку на поддержку",metricBank:"Кошелёк становится полнофункциональным сервисом"},
+{title:"История и реквизиты",zone:"xPay",screen:"manage_history",desc:"Клиент видит историю операций и реквизиты xPay кошелька в одном месте.",metricPartner:"Прозрачность повышает доверие к кошельку",metricBank:"История операций помогает удерживать клиента в xPay"},
+]},
+{id:"payment",label:"Оплата",desc:"Онлайн + офлайн с терминалом + офлайн без терминала",steps:[
+{title:"Онлайн-оплата",zone:"Партнёр",screen:"payment_online",desc:"xPay показывается как встроенный способ оплаты в онлайн-чек-ауте. Клиент подтверждает платёж в один шаг.",metricPartner:"Онлайн-оплата xPay сокращает путь до завершения заказа",metricBank:"xPay становится заметным платёжным способом в основном онлайн-сценарии"},
+{title:"Оффлайн с терминалом",zone:"Партнёр / офлайн",screen:"payment_terminal",desc:"Если в точке продаж есть терминал, клиент может оплатить через xPay и завершить покупку привычным способом.",metricPartner:"Терминальный сценарий не ломает текущий операционный процесс",metricBank:"Даже офлайн-платёж с терминалом проходит через xPay"},
+{title:"Оффлайн без терминала",zone:"Партнёр / офлайн",screen:"payment_no_terminal",desc:"Если терминала нет, клиент подтверждает оплату в xPay, а продавец получает подтверждение без дополнительного оборудования.",metricPartner:"Оплата возможна даже без терминала и упрощает офлайн-процесс",metricBank:"xPay покрывает сценарий, где терминал отсутствует"},
+{title:"Подтверждение оплаты",zone:"xPay",screen:"payment_confirm",desc:"Клиент видит подтверждение списания или резерва средств в xPay кошельке.",metricPartner:"Подтверждение делает процесс оплаты прозрачным",metricBank:"Статус оплаты фиксируется в кошельке и усиливает доверие к продукту"},
+{title:"Оплата завершена",zone:"Партнёр",screen:"payment_done",desc:"Заказ завершён, оплата подтверждена, xPay закрепляется как понятный способ покупки и онлайн, и офлайн.",metricPartner:"Один инструмент покрывает несколько форматов продаж",metricBank:"xPay становится универсальным платёжным сценарием"},
+]},
+{id:"installment",label:"Рассрочка",desc:"Покупка с xPay по сценарию оплаты частями",steps:[
+{title:"Оффер рассрочки",zone:"Партнёр",screen:"inst_offer",desc:"На чек-ауте клиент видит предложение оплатить покупку частями через xPay.",metricPartner:"Рассрочка увеличивает доступность более дорогих заказов",metricBank:"xPay получает дополнительный платёжный инструмент в канале партнёра"},
+{title:"Выбор графика",zone:"Банк / xPay",screen:"inst_plan",desc:"Клиент видит разбивку платежей и выбирает удобный график.",metricPartner:"Прозрачный график делает предложение понятным",metricBank:"Понятные условия повышают конверсию в рассрочку"},
+{title:"Согласие на условия",zone:"Банк / xPay",screen:"inst_consent",desc:"Клиент подтверждает условия рассрочки и график платежей.",metricPartner:"Оформление укладывается в один компактный экран",metricBank:"Подтверждение проходит внутри xPay без лишних шагов"},
+{title:"Первый платёж",zone:"xPay",screen:"inst_confirm",desc:"Клиент видит сумму первого платежа сейчас и график следующих платежей.",metricPartner:"Часть суммы оплачивается сразу, не блокируя покупку",metricBank:"xPay управляет первым списанием и графиком дальше"},
+{title:"Рассрочка оформлена",zone:"Партнёр / xPay",screen:"inst_done",desc:"Покупка оформлена, график дальнейших платежей доступен в xPay кошельке.",metricPartner:"Рассрочка повышает вероятность завершения заказа",metricBank:"График платежей удерживает клиента в xPay на всём цикле оплаты"},
 ]}
 ];
 
 const benefitsPartner=[
-{icon:"gift",title:"Экономия на эквайринге",desc:"Сниженная ставка за транзакции через xPay — экономия до 30% от стандартной межбанковской комиссии",accent:"30%"},
-{icon:"users",title:"20 млн готовых клиентов",desc:"Альфа-Банк приводит платёжеспособную аудиторию в канал партнёра",accent:"20 млн"},
-{icon:"trend",title:"Рост среднего чека +18%",desc:"Клиенты с xPay тратят больше за счёт кэшбэка и скидок",accent:"+18%"},
-{icon:"refresh",title:"Частота покупок +25%",desc:"Совместная лояльность мотивирует возвращаться к партнёру",accent:"+25%"},
-{icon:"sparkle",title:"Совместные офферы",desc:"Скидки финансируются банком из экономии на эквайринге, не из маржи партнёра"},
-{icon:"shield",title:"Рассрочка",desc:"Дополнительный инструмент увеличения конверсии и чека"},
+{icon:"gift",title:"Экономия на эквайринге",desc:"Сниженная ставка за транзакции через xPay помогает сделать платёжный сценарий выгоднее для партнёра",accent:"xPay"},
+{icon:"users",title:"Готовая аудитория",desc:"Партнёр получает дополнительный канал вовлечения пользователей через встроенный xPay"},
+{icon:"trend",title:"Рост среднего чека",desc:"xPay и дополнительные платёжные сценарии помогают усиливать ценность заказа",accent:"+чек"},
+{icon:"refresh",title:"Частота покупок",desc:"Совместная лояльность и удобный кошелёк мотивируют возвращаться чаще"},
+{icon:"sparkle",title:"Совместные офферы",desc:"Выгода для клиента формируется внутри партнёрского сценария и поддерживает конверсию"},
+{icon:"bank",title:"Коммерческое вознаграждение",desc:"Партнёр может получать коммерческое вознаграждение за привлечение и развитие сценария xPay"},
+{icon:"shield",title:"Рассрочка",desc:"Дополнительный инструмент увеличения конверсии и доступности более дорогих покупок"},
 ];
 const benefitsBank=[
-{icon:"users",title:"N2B: новые клиенты",desc:"N2B: привлечение клиентов через готовую аудиторию партнёра — масштабный канал в дополнение к прямым медиа",accent:"N2B"},
-{icon:"card",title:"Выпуск кошельков",desc:"Моментальный выпуск кошелька в канале партнёра — конверсия до 50% от входа в воронку",accent:"до 50%"},
-{icon:"chart",title:"Рост РТО",desc:"Розничный товарооборот по эквайрингу через партнёрскую сеть"},
-{icon:"savings",title:"Привлечение остатков",desc:"Пополнение кошелька с карт других банков — рост балансов на счетах Альфа-Банка"},
-{icon:"data",title:"Данные и аналитика",desc:"Связка «клиент банка — покупатель партнёра» для таргетированных продуктов"},
-{icon:"link",title:"Кросс-продажи",desc:"Кредиты, страхование, инвестиции — на базе транзакционной истории у партнёра"},
+{icon:"users",title:"Партнёрский канал xPay",desc:"xPay развивается через аудиторию партнёра и расширяет точки входа в продукт",accent:"xPay"},
+{icon:"card",title:"Выпуск кошельков",desc:"Моментальный выпуск xPay кошелька в партнёрском контуре ускоряет первую активацию"},
+{icon:"chart",title:"Рост оборота",desc:"Транзакции через xPay усиливают оборот в партнёрском канале"},
+{icon:"savings",title:"Привлечение остатков",desc:"Пополнение xPay кошелька помогает концентрировать деньги внутри банковского контура"},
+{icon:"data",title:"Данные и аналитика",desc:"Связка клиента банка и клиента партнёра помогает точнее развивать продукт"},
+{icon:"link",title:"Кросс-продажи",desc:"На основе использования xPay можно мягко развивать дополнительные банковские сценарии"},
 ];
 
 /* ============================================================
@@ -432,9 +462,9 @@ const SCREENS = {
       </div>
       <div style={{background:"#0A0A0A",color:"#fff",borderRadius:12,padding:"14px",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:10,right:12,width:24,height:24,borderRadius:6,background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13}}>A</div>
-        <div style={{fontSize:10,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>Вам доступно</div>
+        <div style={{fontSize:10,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>Доступно в xPay</div>
         <div className="num" style={{fontSize:36,fontWeight:800,letterSpacing:"-.03em",lineHeight:1,marginTop:4}}>−35%</div>
-        <div style={{fontSize:11,opacity:.7,marginTop:4}}>При оплате xPay</div>
+        <div style={{fontSize:11,opacity:.7,marginTop:4}}>Выгода при оплате xPay</div>
         <div style={{background:"var(--accent)",color:"#fff",borderRadius:9,padding:"9px 0",marginTop:14,fontWeight:600,fontSize:12,textAlign:"center"}}>Подключить xPay</div>
       </div>
     </div>
@@ -442,20 +472,20 @@ const SCREENS = {
   consents:{title:"Оффер + согласия", render:()=>(
     <div style={{padding:"16px"}}>
       <div style={{width:40,height:40,background:"var(--accent)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:20,fontWeight:800,marginBottom:12}}>A</div>
-      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Платите через xPay</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:4,marginBottom:14}}>Подключите кошелёк и сделайте заказ со скидкой</div>
-      {["Скидка до 35%","Бесплатно навсегда","Кэшбэк до 30%"].map((t,i)=>(
+      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Подключите xPay кошелёк</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:4,marginBottom:14}}>Оплачивайте через xPay и используйте кошелёк внутри сценария партнёра</div>
+      {["Выгода при оплате","Быстрое подключение","Оплата и управление в xPay"].map((t,i)=>(
         <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderTop:i===0?"1px solid var(--phone-line-1)":"none",borderBottom:"1px solid var(--phone-line-1)",fontSize:12,color:"var(--phone-text-1)",fontWeight:500}}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-6" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>{t}
         </div>))}
       <div style={{marginTop:14}}>{PBtn("Продолжить")}</div>
-      <div style={{fontSize:8,color:"var(--phone-text-3)",marginTop:10,lineHeight:1.4}}>Нажимая «Продолжить», я подтверждаю согласие с Памяткой ЭДС, СОПД и условиями</div>
+      <div style={{fontSize:8,color:"var(--phone-text-3)",marginTop:10,lineHeight:1.4}}>Нажимая «Продолжить», я подтверждаю согласие с памяткой ЭДС, СОПД и условиями подключения xPay</div>
     </div>
   )},
-  phone:{title:"Ввод телефона", render:()=>(
+  phone:{title:"Идентификация клиента", render:()=>(
     <div style={{padding:16}}>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Введите номер телефона</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:14}}>Мы отправим код подтверждения</div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Идентификация клиента</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:14}}>Введите номер телефона, чтобы продолжить подключение xPay</div>
       <div style={{borderBottom:"1.5px solid var(--phone-text-1)",padding:"6px 0 8px"}}>
         <div style={{fontSize:9,color:"var(--phone-text-2)",textTransform:"uppercase",letterSpacing:".06em"}}>Номер телефона</div>
         <div className="num" style={{fontSize:18,fontWeight:600,color:"var(--phone-text-1)",letterSpacing:".02em",marginTop:2}}>+7 (999) 123-45-67</div>
@@ -501,41 +531,59 @@ const SCREENS = {
       <div style={{marginTop:14}}>{PBtn("Продолжить")}</div>
     </div>
   )},
-  issued:{title:"Кошелёк выпущен", render:()=>(
+  issued:{title:"xPay кошелёк выпущен", render:()=>(
     <div style={{padding:16,textAlign:"center"}}>
       <div style={{width:44,height:44,border:"1.5px solid var(--accent)",borderRadius:"50%",margin:"0 auto 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </div>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Кошелёк xPay выпущен!</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.4}}>Пополните кошелёк и получайте скидку. Закажите пластиковую карту для максимальной выгоды</div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>xPay кошелёк готов</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.4}}>Пополните xPay кошелёк и продолжайте оплату. При необходимости можно сразу заказать пластиковую карту</div>
       <div style={{background:"#0A0A0A",borderRadius:12,padding:14,color:"#fff",textAlign:"left",marginBottom:14,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:12,right:14,width:22,height:22,borderRadius:5,background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:12}}>A</div>
-        <div style={{fontSize:9,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>xPay</div>
-        <div className="num" style={{fontSize:15,fontWeight:600,letterSpacing:"0.3em",marginTop:10}}>•••• 4567</div>
-        <div className="num" style={{fontSize:10,marginTop:6,opacity:.6}}>Баланс: 0 ₽</div>
+        <div style={{fontSize:9,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>xPay кошелёк</div>
+        <div className="num" style={{fontSize:15,fontWeight:600,letterSpacing:"0.08em",marginTop:10}}>Баланс · 0 ₽</div>
+        <div className="num" style={{fontSize:10,marginTop:6,opacity:.6}}>Статус: активен</div>
       </div>
-      {PBtn("Пополнить")}
+      {PBtn("Пополнить кошелёк")}
     </div>
   )},
-  topup:{title:"Пополнение (C2B)", render:()=>(
+  topup_bank_list:{title:"Выбор банка", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:4}}>Выберите банк</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginBottom:12}}>Деньги будут переведены в xPay кошелёк</div>
+      {["Т-Банк","СберБанк","ВТБ","Ozon Банк","Газпромбанк"].map((b,i)=>(
+        <div key={i} style={{background:"#fff",border:i===0?"1.5px solid var(--accent)":"1px solid var(--phone-line-1)",borderRadius:12,padding:"11px 12px",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:30,height:30,borderRadius:8,background:i===0?"#f4f4f4":"#fafafa",border:"1px solid var(--phone-line-1)"}}/>
+            <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>{b}</div>
+          </div>
+          <div style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid "+(i===0?"var(--accent)":"var(--phone-line-1)"),display:"flex",alignItems:"center",justifyContent:"center"}}>
+            {i===0&&<div style={{width:8,height:8,borderRadius:"50%",background:"var(--accent)"}}/>}
+          </div>
+        </div>
+      ))}
+      <div style={{marginTop:10}}>{PBtn("Продолжить")}</div>
+    </div>
+  )},
+  topup:{title:"Пополнение xPay", render:()=>(
     <div style={{padding:16}}>
       <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Подтвердите пополнение</div>
-      {[{l:"Сумма",v:"2 500 ₽"},{l:"Комиссия",v:"0 ₽"},{l:"Откуда",v:"Т-Банк ****8901"},{l:"Куда",v:"Альфа-Банк ****4567",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
+      {[{l:"Сумма",v:"2 500 ₽"},{l:"Комиссия",v:"0 ₽"},{l:"Откуда",v:"Т-Банк ****8901"},{l:"Куда",v:"xPay кошелёк",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
       <div style={{marginTop:16}}>{PBtn("Продолжить")}</div>
     </div>
   )},
-  topup_me2me:{title:"Пополнение (me2me)", render:()=>(
+  topup_me2me:{title:"Пополнение xPay", render:()=>(
     <div style={{padding:16}}>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Запрос на пополнение</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:12}}>Перевод между своими счетами</div>
-      {[{l:"Сумма",v:"2 729 ₽"},{l:"Банк списания",v:"Альфа-Банк"},{l:"Куда",v:"xPay ****4567",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Перевод между своими счетами</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:12}}>Деньги будут зачислены в xPay кошелёк</div>
+      {[{l:"Сумма",v:"2 729 ₽"},{l:"Банк списания",v:"Основной счёт"},{l:"Куда",v:"xPay кошелёк",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
       <div style={{marginTop:16}}>{PBtn("Подтвердить")}</div>
     </div>
   )},
-  select:{title:"Выбор карты", render:()=>(
+  select:{title:"Выбор карты для xPay", render:()=>(
     <div style={{padding:16}}>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Выберите карту в кошельке</div>
-      {[{n:"Карта Альфа-Банка",num:"****4567",bal:"15 200 ₽",sel:true},{n:"Карта Альфа-Банка",num:"****3456",bal:"1 100 ₽",sel:false}].map((c,i)=>(
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Как подключить xPay?</div>
+      {[{n:"Действующая карта",num:"****4567",bal:"15 200 ₽",sel:true},{n:"Вторая карта",num:"****3456",bal:"1 100 ₽",sel:false}].map((c,i)=>(
         <div key={i} style={{background:"#fff",border:c.sel?"1.5px solid var(--accent)":"1px solid var(--phone-line-1)",borderRadius:12,padding:"10px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:36,height:26,background:"var(--phone-text-1)",borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center"}}>
             <div style={{width:10,height:10,borderRadius:3,background:"var(--accent)"}}/></div>
@@ -547,7 +595,34 @@ const SCREENS = {
             {c.sel&&<div style={{width:8,height:8,borderRadius:"50%",background:"var(--accent)"}}/>}
           </div>
         </div>))}
-      <div style={{marginTop:10}}>{PBtn("К оплате")}</div>
+      <div style={{background:"#fff",border:"1px dashed var(--phone-line-1)",borderRadius:12,padding:"12px 12px",marginTop:6}}>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>Или выпустить новую карту для xPay</div>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",marginTop:4}}>Новая карта будет использоваться внутри xPay кошелька</div>
+      </div>
+      <div style={{marginTop:10}}>{PBtn("Продолжить")}</div>
+    </div>
+  )},
+  wallet_ready:{title:"xPay подключён", render:()=>(
+    <div style={{padding:16,textAlign:"center"}}>
+      <div style={{width:44,height:44,border:"1.5px solid var(--accent)",borderRadius:"50%",margin:"0 auto 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>xPay кошелёк подключён</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px"}}>Кошелёк готов к пополнению и оплате у партнёра</div>
+      <div style={{marginTop:10}}>{PBtn("Продолжить")}</div>
+    </div>
+  )},
+  wallet_auto_bind:{title:"Автопривязка xPay", render:()=>(
+    <div style={{padding:16,textAlign:"center"}}>
+      <div style={{width:52,height:52,borderRadius:16,background:"rgba(239,49,36,0.10)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",border:"1px solid rgba(239,49,36,0.16)"}}>
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M7 11h8M11 7l4 4-4 4" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><rect x="2.75" y="4.75" width="6.5" height="12.5" rx="2.25" stroke="var(--phone-text-2)"/><rect x="12.75" y="4.75" width="6.5" height="12.5" rx="2.25" stroke="var(--phone-text-2)"/></svg>
+      </div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>xPay привязан автоматически</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.45}}>Карта и xPay кошелёк автоматически подключены к способу оплаты партнёра</div>
+      <div style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"12px",textAlign:"left"}}>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",textTransform:"uppercase",letterSpacing:".06em"}}>Статус</div>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)",marginTop:4}}>Способ оплаты xPay готов к использованию</div>
+      </div>
     </div>
   )},
   pay:{title:"Оплата со скидкой", render:()=>(
@@ -556,12 +631,12 @@ const SCREENS = {
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </div>
       <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Готово к оплате!</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px"}}>Кошелёк xPay привязан к чек-ауту</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px"}}>xPay кошелёк привязан к чек-ауту партнёра</div>
       <div style={{textAlign:"left",borderTop:"1px solid var(--phone-line-1)",paddingTop:10}}>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--phone-text-2)",padding:"6px 0"}}>
           <span>Заказ</span><span className="num" style={{textDecoration:"line-through"}}>2 729 ₽</span></div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--phone-text-1)",fontWeight:600,padding:"6px 0",borderBottom:"1px solid var(--phone-line-1)"}}>
-          <span>Скидка −35%</span><span className="num">−955 ₽</span></div>
+          <span>Выгода xPay</span><span className="num">−955 ₽</span></div>
         <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0 0",alignItems:"baseline"}}>
           <span style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>Итого</span>
           <span className="num" style={{fontSize:22,fontWeight:800,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>1 774 ₽</span></div>
@@ -572,21 +647,167 @@ const SCREENS = {
   upsell:{title:"Предложение выпуска", render:()=>(
     <div style={{padding:"18px 16px",textAlign:"center"}}>
       <div style={{width:40,height:40,background:"var(--accent)",borderRadius:10,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:20,fontWeight:800}}>A</div>
-      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Подключите бесплатный кошелёк xPay</div>
-      <div style={{fontSize:12,color:"var(--phone-text-2)",margin:"8px 0 16px",lineHeight:1.4}}>и получите повышенную скидку. Кошелёк будет привязан автоматически.</div>
+      <div style={{fontSize:17,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",lineHeight:1.2}}>Откройте xPay кошелёк</div>
+      <div style={{fontSize:12,color:"var(--phone-text-2)",margin:"8px 0 16px",lineHeight:1.4}}>Кошелёк поможет завершить оплату сейчас и останется доступным для следующих покупок.</div>
       {PBtn("Подключить xPay")}
     </div>
   )},
   delivery:{title:"Заказ пластика", render:()=>(
     <div style={{padding:16}}>
-      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Пластиковая карта заказана</div>
-      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:12}}>Пришлём СМС, когда карта будет готова</div>
-      <div style={{borderTop:"1px solid var(--phone-line-1)",borderBottom:"1px solid var(--phone-line-1)",padding:"10px 0"}}>
-        <div style={{fontSize:9,color:"var(--phone-text-2)",textTransform:"uppercase",letterSpacing:".06em"}}>Адрес доставки</div>
-        <div style={{fontSize:13,fontWeight:500,color:"var(--phone-text-1)",marginTop:2}}>г. Москва, Проспект Победы, д. 16</div>
-        <div style={{fontSize:10,color:"var(--phone-text-2)",marginTop:8}}>Понадобится паспорт</div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em"}}>Пластиковая карта для xPay</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:3,marginBottom:12}}>Выберите, как получить карту для xPay кошелька</div>
+      <div style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"10px 12px",marginBottom:8}}>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>Курьером</div>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",marginTop:3}}>г. Москва, Проспект Победы, д. 16</div>
       </div>
-      <div style={{marginTop:14}}>{PBtn("Вернуться к оплате")}</div>
+      <div style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"10px 12px"}}>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>Самовывоз из отделения</div>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",marginTop:3}}>Отделение рядом с клиентом</div>
+      </div>
+      <div style={{marginTop:14}}>{PBtn("Подтвердить")}</div>
+    </div>
+  )},
+  manage_home:{title:"Управление кошельком", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{background:"#0A0A0A",borderRadius:12,padding:14,color:"#fff",marginBottom:12}}>
+        <div style={{fontSize:9,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>xPay кошелёк</div>
+        <div className="num" style={{fontSize:24,fontWeight:800,letterSpacing:"-.03em",marginTop:6}}>4 820 ₽</div>
+        <div style={{fontSize:10,opacity:.7,marginTop:4}}>Доступный баланс</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>
+        {["Пополнить","Перевести","История","Настройки"].map((t,i)=>(
+          <div key={i} style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"12px 10px",fontSize:12,fontWeight:600,color:"var(--phone-text-1)",textAlign:"center"}}>{t}</div>
+        ))}
+      </div>
+    </div>
+  )},
+  manage_topup:{title:"Пополнение xPay", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Как пополнить кошелёк?</div>
+      {["Со счёта в другом банке","Между своими счетами","Автопополнение"].map((t,i)=>(
+        <div key={i} style={{background:"#fff",border:i===0?"1.5px solid var(--accent)":"1px solid var(--phone-line-1)",borderRadius:12,padding:"12px",marginBottom:8,fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>{t}</div>
+      ))}
+      <div style={{marginTop:10}}>{PBtn("Продолжить")}</div>
+    </div>
+  )},
+  manage_transfer:{title:"Перевод в xPay", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)",letterSpacing:"-.02em",marginBottom:12}}>Подтвердите перевод</div>
+      {[{l:"Сумма",v:"1 500 ₽"},{l:"Откуда",v:"Основной счёт"},{l:"Куда",v:"xPay кошелёк",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
+      <div style={{marginTop:16}}>{PBtn("Перевести")}</div>
+    </div>
+  )},
+  manage_actions:{title:"Действия по кошельку", render:()=>(
+    <div style={{padding:16}}>
+      {["Сменить пин-код","Заморозить карту","Настроить автопополнение","Тарифы и условия"].map((t,i)=>(
+        <div key={i} style={{padding:"12px 0",borderBottom:"1px solid var(--phone-line-1)",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>
+          <span>{t}</span>
+          <span style={{color:"var(--phone-text-3)"}}>›</span>
+        </div>
+      ))}
+    </div>
+  )},
+  manage_history:{title:"История и реквизиты", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"12px",marginBottom:12}}>
+        <div style={{fontSize:9,color:"var(--phone-text-2)",textTransform:"uppercase",letterSpacing:".06em"}}>Реквизиты</div>
+        <div className="num" style={{fontSize:13,fontWeight:600,color:"var(--phone-text-1)",marginTop:6}}>xPay кошелёк · **** 4567</div>
+      </div>
+      {[{t:"Покупка у партнёра",s:"−1 774 ₽"},{t:"Пополнение xPay",s:"+2 500 ₽"}].map((r,i)=>(
+        <div key={i} style={{padding:"10px 0",borderBottom:"1px solid var(--phone-line-1)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>{r.t}</div>
+          <div className="num" style={{fontSize:12,color:"var(--phone-text-2)"}}>{r.s}</div>
+        </div>
+      ))}
+    </div>
+  )},
+  payment_online:{title:"Онлайн-оплата", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"12px 14px",marginBottom:10}}>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",textTransform:"uppercase",letterSpacing:".06em"}}>Способ оплаты</div>
+        <div style={{fontSize:13,fontWeight:600,color:"var(--phone-text-1)",marginTop:6}}>xPay выбран по умолчанию</div>
+      </div>
+      <div style={{background:"#0A0A0A",color:"#fff",borderRadius:12,padding:"14px"}}>
+        <div style={{fontSize:10,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>Онлайн</div>
+        <div style={{fontSize:16,fontWeight:700,marginTop:6}}>Оплата в один шаг</div>
+        <div style={{fontSize:11,opacity:.7,marginTop:6}}>Клиент подтверждает покупку через xPay без повторного ввода данных</div>
+      </div>
+    </div>
+  )},
+  payment_terminal:{title:"Оффлайн с терминалом", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{background:"#fff",border:"1px solid var(--phone-line-1)",borderRadius:12,padding:"12px",marginBottom:10}}>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>Точка продаж с терминалом</div>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",marginTop:4}}>xPay используется как платёжный инструмент в привычном сценарии оплаты</div>
+      </div>
+      <div style={{background:"#fff",border:"1px dashed var(--phone-line-1)",borderRadius:12,padding:"12px"}}>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--phone-text-1)"}}>Терминал доступен</div>
+        <div style={{fontSize:10,color:"var(--phone-text-2)",marginTop:4}}>Покупатель подтверждает оплату через xPay, продавец проводит платёж через терминал</div>
+      </div>
+    </div>
+  )},
+  payment_no_terminal:{title:"Оффлайн без терминала", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{background:"#0A0A0A",color:"#fff",borderRadius:12,padding:"14px",marginBottom:10}}>
+        <div style={{fontSize:10,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>Оффлайн</div>
+        <div style={{fontSize:16,fontWeight:700,marginTop:6}}>Оплата без терминала</div>
+        <div style={{fontSize:11,opacity:.7,marginTop:6}}>Клиент подтверждает оплату в xPay, а продавец видит подтверждение без дополнительного оборудования</div>
+      </div>
+      <div style={{fontSize:10,color:"var(--phone-text-2)",lineHeight:1.5}}>Подходит для доставки, временных стоек и офлайн-сценариев, где терминал не используется.</div>
+    </div>
+  )},
+  payment_confirm:{title:"Подтверждение оплаты", render:()=>(
+    <div style={{padding:16,textAlign:"center"}}>
+      <div style={{width:44,height:44,border:"1.5px solid var(--accent)",borderRadius:"50%",margin:"0 auto 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)"}}>Оплата подтверждена</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:6}}>Статус операции сохранён в xPay кошельке</div>
+    </div>
+  )},
+  payment_done:{title:"Оплата завершена", render:()=>(
+    <div style={{padding:16,textAlign:"center"}}>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)"}}>Заказ завершён</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.45}}>xPay поддерживает онлайн-оплату и офлайн-сценарии — и с терминалом, и без терминала</div>
+      <div>{PBtn("В начало")}</div>
+    </div>
+  )},
+  inst_offer:{title:"Рассрочка в xPay", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{background:"#0A0A0A",color:"#fff",borderRadius:12,padding:"14px"}}>
+        <div style={{fontSize:10,opacity:.6,textTransform:"uppercase",letterSpacing:".08em"}}>xPay</div>
+        <div style={{fontSize:17,fontWeight:700,marginTop:6}}>Оплата частями</div>
+        <div style={{fontSize:11,opacity:.7,marginTop:6}}>Разбейте покупку на несколько платежей в xPay</div>
+      </div>
+      <div style={{marginTop:12}}>{PBtn("Выбрать график")}</div>
+    </div>
+  )},
+  inst_plan:{title:"График платежей", render:()=>(
+    <div style={{padding:16}}>
+      {[{l:"Сегодня",v:"1 250 ₽"},{l:"Через 2 недели",v:"1 250 ₽"},{l:"Через 4 недели",v:"1 250 ₽"},{l:"Через 6 недель",v:"1 250 ₽",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
+      <div style={{marginTop:16}}>{PBtn("Продолжить")}</div>
+    </div>
+  )},
+  inst_consent:{title:"Согласие на условия", render:()=>(
+    <div style={{padding:16}}>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)"}}>Подтвердите условия</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",margin:"6px 0 14px",lineHeight:1.45}}>График платежей и условия оплаты частями будут доступны в xPay кошельке.</div>
+      <div>{PBtn("Подтвердить")}</div>
+    </div>
+  )},
+  inst_confirm:{title:"Первый платёж", render:()=>(
+    <div style={{padding:16}}>
+      {[{l:"К оплате сейчас",v:"1 250 ₽"},{l:"Следующий платёж",v:"через 14 дней"},{l:"Статус",v:"График активирован",last:true}].map((r,i)=>(<PRow key={i} l={r.l} v={r.v} last={r.last}/>))}
+      <div style={{marginTop:16}}>{PBtn("Оплатить")}</div>
+    </div>
+  )},
+  inst_done:{title:"Рассрочка оформлена", render:()=>(
+    <div style={{padding:16,textAlign:"center"}}>
+      <div style={{width:44,height:44,border:"1.5px solid var(--accent)",borderRadius:"50%",margin:"0 auto 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{fontSize:16,fontWeight:700,color:"var(--phone-text-1)"}}>График активен</div>
+      <div style={{fontSize:11,color:"var(--phone-text-2)",marginTop:6}}>Следующие платежи доступны в xPay кошельке</div>
     </div>
   )},
 };
@@ -594,7 +815,7 @@ const SCREENS = {
 /* ============================================================
    6. PHONE FRAME — floating with mouse-tilt and screen crossfade
    ============================================================ */
-function Phone({screenKey}){
+function Phone({screenKey, onPrev, onNext}){
   const screen = SCREENS[screenKey] || SCREENS.offer;
 
   // Mouse tilt
@@ -606,6 +827,7 @@ function Phone({screenKey}){
   const sRotX = useSpring(rotX, { stiffness:120, damping:16, mass:0.6 });
 
   const ref = useRef(null);
+  const touchRef = useRef({ x:null, y:null, t:0 });
   const onMove = (e)=>{
     const r = ref.current.getBoundingClientRect();
     const cx = r.left + r.width/2;
@@ -614,6 +836,33 @@ function Phone({screenKey}){
     my.set(((e.clientY - cy) / (r.height/2)));
   };
   const onLeave = ()=>{ mx.set(0); my.set(0); };
+  const onTouchStart = (e)=>{
+    const touch = e.touches && e.touches[0];
+    if(!touch) return;
+    touchRef.current = { x:touch.clientX, y:touch.clientY, t:Date.now() };
+  };
+  const onTouchEnd = (e)=>{
+    const start = touchRef.current;
+    const touch = e.changedTouches && e.changedTouches[0];
+    if(!touch || start.x === null) return;
+
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    const dt = Date.now() - start.t;
+    const isHorizontal = Math.abs(dx) > Math.abs(dy) * 1.2;
+    const passedDistance = Math.abs(dx) > 42;
+    const passedQuickSwipe = Math.abs(dx) > 24 && dt < 280;
+
+    if(isHorizontal && (passedDistance || passedQuickSwipe)){
+      if(dx < 0){
+        onNext && onNext();
+      }else{
+        onPrev && onPrev();
+      }
+    }
+
+    touchRef.current = { x:null, y:null, t:0 };
+  };
 
   return (
     <div style={{
@@ -640,10 +889,15 @@ function Phone({screenKey}){
         ref={ref}
         onMouseMove={onMove}
         onMouseLeave={onLeave}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         style={{
           rotateY:sRotY,
           rotateX:sRotX,
           transformStyle:"preserve-3d",
+          touchAction:"pan-y pinch-zoom",
+          WebkitUserSelect:"none",
+          userSelect:"none",
           width:296,height:600,
           borderRadius:48,
           background:"linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)",
@@ -852,9 +1106,9 @@ function Hero({activeScenario, setActiveScenario}){
           transition={{duration:0.8, ease:EASE, delay:0.7}}
           style={{paddingBottom:24, maxWidth:380}}>
           <div style={{fontSize:17, color:"var(--text-2)", lineHeight:1.55, letterSpacing:"-0.005em"}}>
-            White-label банковский кошелёк, встроенный в чек-аут партнёра.
-            Универсальный прототип B2B-интеграции — клиентский путь
-            для трёх типов пользователей.
+            Универсальный xPay-прототип в исходном визуальном стиле:
+            подключение кошелька, управление, оплата и рассрочка
+            в едином партнёрском сценарии.
           </div>
           <div style={{display:"flex",alignItems:"center",gap:14,marginTop:24,fontSize:12,color:"var(--text-3)",letterSpacing:"0.02em"}}>
             <div style={{display:"flex",alignItems:"center",gap:6}}>
@@ -862,7 +1116,7 @@ function Hero({activeScenario, setActiveScenario}){
               Live прототип
             </div>
             <span className="dot"/>
-            <span>3 сценария · 20 шагов</span>
+            <span>6 разделов · универсальный сценарий</span>
           </div>
         </motion.div>
       </div>
@@ -1154,8 +1408,7 @@ function StepInfo({step, stepIdx, totalSteps, showMetrics, onPrev, onNext}){
           Назад
         </button>
         <button
-          disabled={stepIdx===totalSteps-1}
-          onClick={onNext}
+          onClick={stepIdx===totalSteps-1 ? ()=>window.scrollTo({top:0, behavior:"smooth"}) : onNext}
           style={{
             display:"flex", alignItems:"center", gap:10,
             padding:"13px 26px",
@@ -1163,15 +1416,15 @@ function StepInfo({step, stepIdx, totalSteps, showMetrics, onPrev, onNext}){
             borderRadius:12,
             fontSize:13, fontWeight:600,
             color:"#fff",
-            background: stepIdx===totalSteps-1 ? "var(--surface-2)" : "var(--accent)",
-            cursor: stepIdx===totalSteps-1 ? "default":"pointer",
+            background:"var(--accent)",
+            cursor:"pointer",
             transition:"all 200ms var(--ease-swift)",
-            boxShadow: stepIdx===totalSteps-1 ? "none" : "0 8px 24px -6px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.18)"
+            boxShadow:"0 8px 24px -6px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.18)"
           }}
-          onMouseEnter={e=>{ if(stepIdx<totalSteps-1) e.currentTarget.style.background="var(--accent-hi)"; }}
-          onMouseLeave={e=>{ if(stepIdx<totalSteps-1) e.currentTarget.style.background="var(--accent)"; }}>
-          Далее
-          <Ico d={ICONS.arrow_r} size={14}/>
+          onMouseEnter={e=>{ e.currentTarget.style.background="var(--accent-hi)"; }}
+          onMouseLeave={e=>{ e.currentTarget.style.background="var(--accent)"; }}>
+          {stepIdx===totalSteps-1 ? "В начало" : "Далее"}
+          <Ico d={stepIdx===totalSteps-1 ? ICONS.arrow_l : ICONS.arrow_r} size={14}/>
         </button>
       </div>
     </div>
@@ -1252,6 +1505,8 @@ function CJMSection({activeScenario, activeStep, setActiveStep, showMetrics}){
   // the new scenario's range before the reset useEffect fires.
   const safeStep = Math.min(activeStep, sc.steps.length - 1);
   const step = sc.steps[safeStep];
+  const goPrev = ()=>setActiveStep(p=>Math.max(0, p-1));
+  const goNext = ()=>setActiveStep(p=>Math.min(sc.steps.length-1, p+1));
 
   return (
     <section className="section" style={{
@@ -1277,20 +1532,20 @@ function CJMSection({activeScenario, activeStep, setActiveStep, showMetrics}){
           justifyContent:"center",
           gap:20
         }}>
-          <Phone screenKey={step.screen}/>
+          <Phone screenKey={step.screen} onPrev={goPrev} onNext={goNext}/>
           <MobileStepNav
             current={safeStep}
             total={sc.steps.length}
-            onPrev={()=>setActiveStep(p=>Math.max(0, p-1))}
-            onNext={()=>setActiveStep(p=>Math.min(sc.steps.length-1, p+1))}/>
+            onPrev={goPrev}
+            onNext={goNext}/>
         </div>
         <StepInfo
           step={step}
           stepIdx={safeStep}
           totalSteps={sc.steps.length}
           showMetrics={showMetrics}
-          onPrev={()=>setActiveStep(p=>Math.max(0, p-1))}
-          onNext={()=>setActiveStep(p=>Math.min(sc.steps.length-1, p+1))}/>
+          onPrev={goPrev}
+          onNext={goNext}/>
       </div>
     </section>
   );
